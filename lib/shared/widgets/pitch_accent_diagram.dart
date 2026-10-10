@@ -107,28 +107,71 @@ class PitchAccentDiagram extends StatelessWidget {
 
     final effectiveColor = color ?? Theme.of(context).colorScheme.onSurface;
     final downstepColor = Theme.of(context).colorScheme.error;
+    final pattern = pitchPattern(downstepPosition, morae.length);
+    final widths = [
+      for (final mora in morae) _PitchAccentPainter.moraWidth(mora, fontSize),
+    ];
+    final particleWidth = _PitchAccentPainter.particleWidth(fontSize);
 
-    return CustomPaint(
-      painter: _PitchAccentPainter(
-        morae: morae,
-        downstepPosition: downstepPosition,
-        fontSize: fontSize,
-        textColor: effectiveColor,
-        lineColor: effectiveColor,
-        downstepColor: downstepColor,
-      ),
-      child: SizedBox(
-        width: _PitchAccentPainter.calculateWidth(morae, fontSize),
-        height: _PitchAccentPainter.calculateHeight(fontSize),
-      ),
+    Widget row(int start, int end, double moraeWidth) {
+      final isLast = end == morae.length;
+      return CustomPaint(
+        painter: _PitchAccentPainter(
+          morae: morae.sublist(start, end),
+          // The last row also carries the particle's pitch.
+          pattern: pattern.sublist(start, isLast ? end + 1 : end),
+          downstepIndex: downstepPosition - 1 - start,
+          fontSize: fontSize,
+          textColor: effectiveColor,
+          lineColor: effectiveColor,
+          downstepColor: downstepColor,
+        ),
+        child: SizedBox(
+          width: moraeWidth + (isLast ? particleWidth : 0),
+          height: _PitchAccentPainter.calculateHeight(fontSize),
+        ),
+      );
+    }
+
+    // The painter draws at its natural size whatever box it gets, so a
+    // diagram wider than the line is split into rows of morae (at the font
+    // size the reader chose) rather than painted past the edge.
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final rows = <Widget>[];
+        var start = 0;
+        while (start < morae.length) {
+          var end = start + 1;
+          var width = widths[start];
+          while (end < morae.length &&
+              width +
+                      _PitchAccentPainter.moraSpacing +
+                      widths[end] +
+                      particleWidth <=
+                  constraints.maxWidth) {
+            width += _PitchAccentPainter.moraSpacing + widths[end];
+            end++;
+          }
+          rows.add(row(start, end, width));
+          start = end;
+        }
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: rows,
+        );
+      },
     );
   }
 }
 
+/// Paints one row of a diagram: [morae] with their pitch [pattern], which has
+/// one more entry than [morae] when the row ends with the particle.
 class _PitchAccentPainter extends CustomPainter {
   _PitchAccentPainter({
     required this.morae,
-    required this.downstepPosition,
+    required this.pattern,
+    required this.downstepIndex,
     required this.fontSize,
     required this.textColor,
     required this.lineColor,
@@ -136,7 +179,11 @@ class _PitchAccentPainter extends CustomPainter {
   });
 
   final List<String> morae;
-  final int downstepPosition;
+  final List<bool> pattern;
+
+  /// Index in [morae] of the mora before the downstep; outside it when the
+  /// downstep is in another row or there is none.
+  final int downstepIndex;
   final double fontSize;
   final Color textColor;
   final Color lineColor;
@@ -144,7 +191,7 @@ class _PitchAccentPainter extends CustomPainter {
 
   static const double _dotRadius = 3.0;
   static const double _lineWidth = 1.5;
-  static const double _moraSpacing = 4.0;
+  static const double moraSpacing = 4.0;
   static const double _particleExtraSpacing = 6.0;
 
   /// Height of the pitch diagram area above the text.
@@ -154,21 +201,14 @@ class _PitchAccentPainter extends CustomPainter {
     return _pitchAreaHeight(fontSize) + fontSize + 4;
   }
 
-  static double calculateWidth(List<String> morae, double fontSize) {
-    double totalWidth = 0;
-    for (var i = 0; i < morae.length; i++) {
-      final tp = _createTextPainter(morae[i], fontSize);
-      tp.layout();
-      totalWidth += tp.width;
-      if (i < morae.length - 1) totalWidth += _moraSpacing;
-    }
-    // Add space for particle marker
-    totalWidth += _particleExtraSpacing;
-    final particleTp = _createTextPainter('(', fontSize * 0.8);
-    particleTp.layout();
-    totalWidth += particleTp.width + _dotRadius * 2;
-    return totalWidth;
-  }
+  static double moraWidth(String mora, double fontSize) =>
+      (_createTextPainter(mora, fontSize)..layout()).width;
+
+  /// Room taken by the particle marker after the last mora.
+  static double particleWidth(double fontSize) =>
+      _particleExtraSpacing +
+      (_createTextPainter('(', fontSize * 0.8)..layout()).width +
+      _dotRadius * 2;
 
   static TextPainter _createTextPainter(
     String text,
@@ -186,7 +226,6 @@ class _PitchAccentPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final pattern = pitchPattern(downstepPosition, morae.length);
     final pitchAreaH = _pitchAreaHeight(fontSize);
     final highY = _dotRadius + 2;
     final lowY = pitchAreaH - _dotRadius - 2;
@@ -207,18 +246,16 @@ class _PitchAccentPainter extends CustomPainter {
 
     // Measure mora widths and compute x centers
     final moraCenters = <double>[];
-    final moraWidths = <double>[];
     double x = 0;
 
     for (var i = 0; i < morae.length; i++) {
       final tp = _createTextPainter(morae[i], fontSize, textColor);
       tp.layout();
-      moraWidths.add(tp.width);
       moraCenters.add(x + tp.width / 2);
 
       // Draw mora text
       tp.paint(canvas, Offset(x, textY));
-      x += tp.width + _moraSpacing;
+      x += tp.width + moraSpacing;
     }
 
     // Draw dots and connecting lines for morae
@@ -234,21 +271,19 @@ class _PitchAccentPainter extends CustomPainter {
       }
 
       // Draw dot
-      final isDownstep =
-          downstepPosition > 0 && i == downstepPosition - 1 && i < morae.length;
       canvas.drawCircle(
         Offset(cx, cy),
         _dotRadius,
-        isDownstep ? downstepPaint : dotPaint,
+        i == downstepIndex ? downstepPaint : dotPaint,
       );
     }
 
     // Draw particle dot (dashed line connection)
-    if (morae.isNotEmpty) {
+    if (morae.isNotEmpty && pattern.length > morae.length) {
       final lastMoraCx = moraCenters.last;
       final lastMoraCy = pattern[morae.length - 1] ? highY : lowY;
       final particleCx =
-          x - _moraSpacing + _particleExtraSpacing + _dotRadius * 2;
+          x - moraSpacing + _particleExtraSpacing + _dotRadius * 2;
       final particleCy = pattern[morae.length] ? highY : lowY;
 
       // Dashed line to particle
@@ -274,7 +309,8 @@ class _PitchAccentPainter extends CustomPainter {
   @override
   bool shouldRepaint(covariant _PitchAccentPainter oldDelegate) {
     return oldDelegate.morae != morae ||
-        oldDelegate.downstepPosition != downstepPosition ||
+        oldDelegate.pattern != pattern ||
+        oldDelegate.downstepIndex != downstepIndex ||
         oldDelegate.fontSize != fontSize ||
         oldDelegate.textColor != textColor ||
         oldDelegate.lineColor != lineColor ||

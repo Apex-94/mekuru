@@ -220,6 +220,39 @@ void main() {
     expect(tapped, ['命']);
   });
 
+  testWidgets('a long pitch accent diagram wraps into rows in a narrow card', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Align(
+          alignment: Alignment.topLeft,
+          child: SizedBox(
+            width: 120,
+            child: PitchAccentDiagram(
+              reading: 'しょうがくきんせいど',
+              downstepPosition: 5,
+              fontSize: 30,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // The painter draws at its natural size whatever box it gets, so every
+    // row must fit the line at the size the reader chose.
+    final rows = tester.widgetList<SizedBox>(
+      find.descendant(
+        of: find.byType(PitchAccentDiagram),
+        matching: find.byType(SizedBox),
+      ),
+    );
+    expect(rows.length, greaterThan(1));
+    for (final row in rows) {
+      expect(row.width, lessThanOrEqualTo(120));
+    }
+  });
+
   testWidgets('renders part-of-speech chips when tags are present', (
     tester,
   ) async {
