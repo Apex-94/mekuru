@@ -472,11 +472,30 @@ class _GroupedDictionaryEntryHeaderState
                 ),
                 const SizedBox(height: 8),
                 Wrap(spacing: 4, runSpacing: 4, children: actionButtons),
-              ] else
+              ] else if (_kanjiDisplayData == null)
+                // A Wrap, so a word too wide to share its line with the
+                // buttons keeps the reader's font size and the buttons move
+                // under it.
+                Wrap(
+                  alignment: WrapAlignment.spaceBetween,
+                  crossAxisAlignment: WrapCrossAlignment.end,
+                  runSpacing: 8,
+                  children: [
+                    _buildHeaderContent(
+                      theme,
+                      expressionStyle,
+                      furiganaStyle,
+                      null,
+                    ),
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: actionButtons,
+                    ),
+                  ],
+                )
+              else
                 Row(
-                  crossAxisAlignment: _kanjiDisplayData == null
-                      ? CrossAxisAlignment.end
-                      : CrossAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Expanded(
                       child: _buildHeaderContent(
@@ -550,16 +569,18 @@ class _GroupedDictionaryEntryHeaderState
     KanjiEntryDisplayData? kanjiDisplayData,
   ) {
     if (kanjiDisplayData == null) {
-      return Row(
-        crossAxisAlignment: CrossAxisAlignment.end,
+      // A Wrap, so at large font sizes the badge moves under the word
+      // instead of sharing a line too narrow for both.
+      return Wrap(
+        crossAxisAlignment: WrapCrossAlignment.end,
+        spacing: 8,
+        runSpacing: 4,
         children: [
-          Flexible(child: _buildExpression(expressionStyle, furiganaStyle)),
+          _buildExpression(expressionStyle, furiganaStyle),
           // No rank means no frequency data (no frequency dictionary covers
           // the word), not a rare word.
-          if (_frequencyRank case final rank?) ...[
-            const SizedBox(width: 8),
+          if (_frequencyRank case final rank?)
             _FrequencyTag(rank: rank, fontSize: widget.fontSize),
-          ],
         ],
       );
     }

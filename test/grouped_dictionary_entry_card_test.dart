@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:drift/drift.dart' show Value;
 import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/misc.dart' show Override;
 import 'package:flutter_test/flutter_test.dart';
@@ -17,6 +18,7 @@ import 'package:mekuru/features/dictionary/data/models/dictionary_entry.dart';
 import 'package:mekuru/features/dictionary/data/repositories/dictionary_repository.dart';
 import 'package:mekuru/features/dictionary/data/services/dictionary_query_service.dart';
 import 'package:mekuru/features/dictionary/presentation/widgets/source_section_label.dart';
+import 'package:mekuru/features/dictionary/presentation/widgets/tappable_expression_text.dart';
 import 'package:mekuru/features/reader/data/services/sentence_translation.dart';
 import 'package:mekuru/main.dart' show databaseProvider, scaffoldMessengerKey;
 import 'package:mekuru/shared/widgets/furigana_text.dart';
@@ -151,6 +153,71 @@ void main() {
 
     await pumpCard(20000, locale: const Locale('es'));
     expect(find.text('Poco común'), findsOneWidget);
+  });
+
+  testWidgets('a long word at the largest font keeps its size and wraps', (
+    tester,
+  ) async {
+    // Feedback MEKURU-2B: the furigana headword overflowed its slot at large
+    // lookup font sizes and was painted over the frequency badge. The reader
+    // chose that size, so the word and badge wrap instead of shrinking.
+    final tapped = <String>[];
+    for (final tappable in [false, true]) {
+      await tester.pumpWidget(
+        _buildTestApp(
+          db: db,
+          width: 300,
+          child: GroupedDictionaryEntryCard(
+            key: ValueKey(tappable),
+            entries: [
+              DictionaryEntryWithSource(
+                entry: _buildEntry(
+                  id: 1,
+                  expression: '一生懸命',
+                  reading: 'いっしょうけんめい',
+                ),
+                dictionaryName: 'JMdict',
+                frequencyRank: 3000,
+              ),
+            ],
+            pitchAccents: const [],
+            fontSize: 32,
+            onWordTap: tappable ? tapped.add : null,
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(tester.takeException(), isNull);
+      final word = tester.getRect(
+        find.byType(tappable ? TappableExpressionText : FuriganaText),
+      );
+      expect(
+        tester.getRect(find.text('Very Common')).top,
+        greaterThanOrEqualTo(word.bottom),
+        reason: 'the badge moves to its own line',
+      );
+    }
+
+    // Each kanji is drawn unscaled and answers a tap where it is drawn.
+    final word = tester.renderObject<RenderParagraph>(
+      find.byWidgetPredicate(
+        (w) => w is RichText && w.text.toPlainText() == '一生懸命',
+      ),
+    );
+    final last = word
+        .getBoxesForSelection(
+          const TextSelection(baseOffset: 3, extentOffset: 4),
+        )
+        .single
+        .toRect();
+    expect(
+      word.localToGlobal(last.bottomRight).dx -
+          word.localToGlobal(last.bottomLeft).dx,
+      moreOrLessEquals(last.width),
+    );
+    await tester.tapAt(word.localToGlobal(last.center));
+    expect(tapped, ['命']);
   });
 
   testWidgets('renders part-of-speech chips when tags are present', (

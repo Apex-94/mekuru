@@ -230,9 +230,10 @@ class FuriganaText extends StatelessWidget {
 
     final segments = segmentFurigana(expression, reading);
 
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.end,
-      mainAxisSize: MainAxisSize.min,
+    // A Wrap, so a word wider than the line breaks between segments (and a
+    // segment wider than the line wraps its own text) instead of overflowing.
+    return Wrap(
+      crossAxisAlignment: WrapCrossAlignment.end,
       children: segments.map((seg) {
         if (seg.furigana != null) {
           return Column(
