@@ -412,8 +412,12 @@ void main() {
         'content': {'tag': 'img', 'path': 'wide.png', 'width': 100},
       });
       Future<int> decodedWidth(Finder image) async {
-        // The image cache loads outside the test's fake clock.
-        for (var i = 0; i < 3; i++) {
+        // The image cache loads outside the test's fake clock, slowly on CI.
+        for (
+          var i = 0;
+          i < 100 && tester.widget<RawImage>(image).image == null;
+          i++
+        ) {
           await tester.runAsync(
             () => Future<void>.delayed(const Duration(milliseconds: 20)),
           );
