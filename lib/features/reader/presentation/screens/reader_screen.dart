@@ -1626,7 +1626,7 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen>
   Widget _buildTopBar(bool isProUnlocked) {
     final l10n = context.l10n;
 
-    return ReaderBarScrim(
+    final bar = ReaderBarScrim(
       atTop: true,
       child: SafeArea(
         bottom: false,
@@ -1700,6 +1700,17 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen>
           ],
         ),
       ),
+    );
+    // Seven buttons at 48 dp need 336 dp: on narrow phones (320 dp) they
+    // drop the padding that rounds them up to 48 and take 40 each.
+    if (MediaQuery.sizeOf(context).width >= 400) return bar;
+    return IconButtonTheme(
+      data: IconButtonThemeData(
+        style: IconButton.styleFrom(
+          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+        ),
+      ),
+      child: bar,
     );
   }
 
