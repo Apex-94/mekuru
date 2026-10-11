@@ -154,6 +154,10 @@ class _BookSearchSheetState extends ConsumerState<BookSearchSheet> {
                                   ? null
                                   : Text(
                                       hit.chapter,
+                                      // Material's 14 under a 16 title.
+                                      style: TextStyle(
+                                        fontSize: fontSize * 14 / 16,
+                                      ),
                                       maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
                                     ),

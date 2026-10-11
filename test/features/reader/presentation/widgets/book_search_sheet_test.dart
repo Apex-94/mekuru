@@ -85,6 +85,11 @@ void main() {
 
     expect(find.text(en.readerSearchResultCount(count: 2)), findsOneWidget);
     expect(find.text('第二章'), findsNWidgets(2));
+    expect(
+      tester.widget<Text>(find.text('第二章').first).style?.fontSize,
+      24.5,
+      reason: 'chapter names scale with the hits',
+    );
     final hitText = tester
         .widget<RichText>(find.textContaining('前の文4', findRichText: true))
         .text;
