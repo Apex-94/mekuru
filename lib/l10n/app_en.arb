@@ -5760,5 +5760,35 @@
   "lowRamModeOffHere": "Off in Low RAM mode",
   "@lowRamModeOffHere": {
     "description": "Subtitle of a feature that Low RAM mode turns off."
+  },
+  "readerSearchTooltip": "Search in book",
+  "@readerSearchTooltip": {
+    "description": "Tooltip of the reader's top-bar button that opens in-book search."
+  },
+  "readerSearchHint": "Search this book",
+  "@readerSearchHint": {
+    "description": "Hint in the in-book search field."
+  },
+  "readerSearchNoResults": "No matches in this book",
+  "@readerSearchNoResults": {
+    "description": "In-book search found nothing."
+  },
+  "readerSearchResultCount": "{count, plural, =1{1 match} other{{count} matches}}",
+  "@readerSearchResultCount": {
+    "description": "How many matches in-book search has found (so far, while it is still searching).",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "readerSearchResultsCapped": "Showing the first {count} matches",
+  "@readerSearchResultsCapped": {
+    "description": "In-book search stopped at its limit of {count} matches.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   }
 }

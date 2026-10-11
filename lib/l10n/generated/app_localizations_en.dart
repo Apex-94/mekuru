@@ -4467,4 +4467,29 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get lowRamModeOffHere => 'Off in Low RAM mode';
+
+  @override
+  String get readerSearchTooltip => 'Search in book';
+
+  @override
+  String get readerSearchHint => 'Search this book';
+
+  @override
+  String get readerSearchNoResults => 'No matches in this book';
+
+  @override
+  String readerSearchResultCount({required int count}) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count matches',
+      one: '1 match',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String readerSearchResultsCapped({required int count}) {
+    return 'Showing the first $count matches';
+  }
 }

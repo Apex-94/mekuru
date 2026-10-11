@@ -3227,5 +3227,10 @@
   "lowRamModeNotNow": "暂不",
   "lowRamModeCloseBody": "增强振假名词典在 Mekuru 关闭前会一直占用约 250 MB 内存。现在关闭 Mekuru 即可释放，然后再重新打开。",
   "lowRamModeCloseNow": "立即关闭 Mekuru",
-  "lowRamModeOffHere": "低内存模式下已关闭"
+  "lowRamModeOffHere": "低内存模式下已关闭",
+  "readerSearchTooltip": "在书中搜索",
+  "readerSearchHint": "搜索本书",
+  "readerSearchNoResults": "本书中没有匹配项",
+  "readerSearchResultCount": "{count, plural, =1{1 个匹配项} other{{count} 个匹配项}}",
+  "readerSearchResultsCapped": "仅显示前 {count} 个匹配项"
 }

@@ -11,6 +11,7 @@ import 'package:mekuru/features/manga/presentation/screens/pro_upgrade_screen.da
 import 'package:mekuru/features/reader/data/models/epub_models.dart';
 import 'package:mekuru/features/reader/data/models/reader_settings.dart';
 import 'package:mekuru/features/reader/data/reader_session_tracker.dart';
+import 'package:mekuru/features/reader/data/services/book_search_session.dart';
 import 'package:mekuru/features/reader/data/services/epub_file_resolver.dart';
 import 'package:mekuru/features/reader/data/services/mecab_service.dart';
 import 'package:mekuru/features/reader/data/services/reader_progress_persistence.dart';
@@ -19,6 +20,7 @@ import 'package:mekuru/features/reader/presentation/providers/user_font_provider
 import 'package:mekuru/features/reader/presentation/reader_display_settings_mapper.dart';
 import 'package:mekuru/features/reader/presentation/reader_interaction_logic.dart';
 import 'package:mekuru/features/reader/data/models/highlight_color.dart';
+import 'package:mekuru/features/reader/presentation/widgets/book_search_sheet.dart';
 import 'package:mekuru/features/reader/presentation/widgets/bookmarks_sheet.dart';
 import 'package:mekuru/features/reader/presentation/widgets/bridge_transfer.dart';
 import 'package:mekuru/features/reader/presentation/widgets/custom_epub_controller.dart';
@@ -75,6 +77,22 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen>
     with WidgetsBindingObserver, ReadingSessionReviewPrompt<ReaderScreen> {
   final _epubController = CustomEpubController();
   final _epubFileResolver = EpubFileResolver();
+
+  /// In-book search, kept while the reader is open so the results list
+  /// reopens as it was left.
+  late final _search = BookSearchSession(
+    _epubController.searchBook,
+    onFinished: (status, hits) => countUsage(
+      'reader.search',
+      attrs: {
+        'result': hits == 0
+            ? 'none'
+            : status == BookSearchStatus.capped
+            ? 'capped'
+            : 'some',
+      },
+    ),
+  );
 
   /// The reader's key-handling focus (see [ReaderKeyNavigation]).
   final _keyFocus = FocusNode(debugLabel: 'reader keys');
@@ -267,6 +285,7 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen>
     unawaited(setReaderSystemBarsVisible(true));
     WakelockPlus.disable();
     _keyFocus.dispose();
+    _search.dispose();
     super.dispose();
   }
 
@@ -586,6 +605,7 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen>
                               }
                             },
                             onPageKey: _onPageKey,
+                            onSearchProgress: _search.onProgress,
                             onPageCharacters: (count, pageKey, screens) {
                               _sessionTracker
                                 ..recordCharactersRead(count, pageKey: pageKey)
@@ -956,6 +976,9 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen>
       }
 
       if (!mounted) return;
+      // The new viewer has no search running; reopening the search sheet
+      // runs it again.
+      _search.markInterrupted();
       setState(() {
         _initialCfi = currentCfi ?? _initialCfi;
         _isLoading = true;
@@ -997,6 +1020,8 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen>
     }
     if (_isEpubCfi(_currentCfi)) _initialCfi = _currentCfi;
     _rendererGone = true;
+    // Now, not at the rebuild: that waits for an open search sheet to close.
+    _search.markInterrupted();
     _rebuildIfRendererGone();
   }
 
@@ -1468,6 +1493,17 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen>
     }
   }
 
+  void _showSearchSheet() {
+    _search.resumeIfInterrupted();
+    showBookSearchSheet(
+      context,
+      session: _search,
+      onOpenHit: (hit) {
+        if (_isEpubLoaded) _epubController.showSearchHit(hit.cfi, hit.match);
+      },
+    );
+  }
+
   void _showBookmarksSheet() {
     showModalBottomSheet(
       context: context,
@@ -1612,6 +1648,11 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen>
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               ),
+            ),
+            IconButton(
+              icon: const Icon(Icons.search, color: Colors.white),
+              tooltip: l10n.readerSearchTooltip,
+              onPressed: _showSearchSheet,
             ),
             if (_chapters.isNotEmpty)
               IconButton(

@@ -148,24 +148,17 @@ class CustomEpubController {
 
   // ── Search ──────────────────────────────────────────────────────────
 
-  Completer<List<Map<String, dynamic>>>? _searchCompleter;
-
-  Future<List<Map<String, dynamic>>> search(String query) {
-    _supersedeCompleter(_searchCompleter, 'search');
-    final completer = Completer<List<Map<String, dynamic>>>();
-    _searchCompleter = completer;
-    final escaped = query.replaceAll('"', '\\"');
-    unawaited(_requestSearch(escaped));
-    return completer.future;
+  /// Starts `searchBook` in the bridge (see there), whose results come back
+  /// through `CustomEpubViewer.onSearchProgress` tagged with [id].
+  void searchBook(int id, String query) {
+    _eval('searchBook($id, ${jsonEncode(query)})');
   }
 
-  void completeSearch(List<dynamic> results) {
-    if (_searchCompleter != null && !_searchCompleter!.isCompleted) {
-      _searchCompleter!.complete(
-        results.map((e) => Map<String, dynamic>.from(e as Map)).toList(),
-      );
-    }
-    _searchCompleter = null;
+  /// Jumps to a search hit's range [cfi] and marks it for a moment. [text]
+  /// is the matched text, which picks the range's reading while generated
+  /// furigana is on the page (as for [addHighlight]).
+  void showSearchHit(String cfi, String text) {
+    _eval('showSearchHit(${jsonEncode(cfi)}, ${jsonEncode(text)})');
   }
 
   // ── Annotations ─────────────────────────────────────────────────────
@@ -198,16 +191,9 @@ class CustomEpubController {
   /// view cannot tell.
   Future<String> chapterTitleAt(String cfi) async {
     try {
-      final raw = await _evaluateJavascript('tocPlacement(${jsonEncode(cfi)})');
-      final placement = (raw is String ? jsonDecode(raw) : raw) as Map;
-      return pickChapterTitle(placement['spine'] as int, [
-        for (final entry in placement['toc'] as List)
-          (
-            title: entry[0] as String,
-            spine: entry[1] as int,
-            anchorAfter: entry[2] as bool?,
-          ),
-      ]);
+      return chapterTitleFromPlacement(
+        await _evaluateJavascript('tocPlacement(${jsonEncode(cfi)})'),
+      );
     } catch (error) {
       debugPrint('[EPUB_DART] chapterTitleAt failed: $error');
       return '';
@@ -272,18 +258,6 @@ class CustomEpubController {
     }
   }
 
-  Future<void> _requestSearch(String escapedQuery) async {
-    try {
-      await _evaluateJavascript('searchInBook("$escapedQuery")');
-    } catch (error, stackTrace) {
-      final completer = _searchCompleter;
-      _searchCompleter = null;
-      if (completer != null && !completer.isCompleted) {
-        completer.completeError(error, stackTrace);
-      }
-    }
-  }
-
   Future<void> _requestCurrentPageText() async {
     try {
       await _evaluateJavascript('getCurrentPageText()');
@@ -330,12 +304,6 @@ class CustomEpubController {
     _locationCompleter = null;
     if (locationCompleter != null && !locationCompleter.isCompleted) {
       locationCompleter.completeError(error, stackTrace);
-    }
-
-    final searchCompleter = _searchCompleter;
-    _searchCompleter = null;
-    if (searchCompleter != null && !searchCompleter.isCompleted) {
-      searchCompleter.completeError(error, stackTrace);
     }
 
     final pageTextCompleter = _pageTextCompleter;

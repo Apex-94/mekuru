@@ -56,4 +56,11 @@ void main() {
       expect(pickChapterTitle(3, toc), '第二章');
     });
   });
+
+  test('reads a tocPlacement result from the bridge', () {
+    const raw =
+        '{"spine":3,"toc":[["第一章",2,false],["第二章",3,null],'
+        '["第三章",3,null]]}';
+    expect(chapterTitleFromPlacement(raw), '第二章');
+  });
 }

@@ -4521,4 +4521,29 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get lowRamModeOffHere => 'Desactivado en el modo de poca RAM';
+
+  @override
+  String get readerSearchTooltip => 'Buscar en el libro';
+
+  @override
+  String get readerSearchHint => 'Buscar en este libro';
+
+  @override
+  String get readerSearchNoResults => 'No hay coincidencias en este libro';
+
+  @override
+  String readerSearchResultCount({required int count}) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count coincidencias',
+      one: '1 coincidencia',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String readerSearchResultsCapped({required int count}) {
+    return 'Se muestran las primeras $count coincidencias';
+  }
 }

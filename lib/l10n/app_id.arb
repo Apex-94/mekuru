@@ -3227,5 +3227,10 @@
   "lowRamModeNotNow": "Nanti saja",
   "lowRamModeCloseBody": "Kamus Furigana yang Ditingkatkan memakai sekitar 250 MB memori sampai Mekuru ditutup. Tutup Mekuru sekarang untuk mengosongkannya, lalu buka lagi.",
   "lowRamModeCloseNow": "Tutup Mekuru sekarang",
-  "lowRamModeOffHere": "Nonaktif dalam mode RAM rendah"
+  "lowRamModeOffHere": "Nonaktif dalam mode RAM rendah",
+  "readerSearchTooltip": "Cari di buku",
+  "readerSearchHint": "Cari di buku ini",
+  "readerSearchNoResults": "Tidak ada hasil di buku ini",
+  "readerSearchResultCount": "{count, plural, =1{1 hasil} other{{count} hasil}}",
+  "readerSearchResultsCapped": "Menampilkan {count} hasil pertama"
 }

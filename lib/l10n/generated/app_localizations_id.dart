@@ -4489,4 +4489,29 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String get lowRamModeOffHere => 'Nonaktif dalam mode RAM rendah';
+
+  @override
+  String get readerSearchTooltip => 'Cari di buku';
+
+  @override
+  String get readerSearchHint => 'Cari di buku ini';
+
+  @override
+  String get readerSearchNoResults => 'Tidak ada hasil di buku ini';
+
+  @override
+  String readerSearchResultCount({required int count}) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count hasil',
+      one: '1 hasil',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String readerSearchResultsCapped({required int count}) {
+    return 'Menampilkan $count hasil pertama';
+  }
 }

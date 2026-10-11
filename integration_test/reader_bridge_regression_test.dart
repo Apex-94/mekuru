@@ -1,9 +1,9 @@
 // reader_bridge.js on a real web view (WKWebView on iOS, Chromium on
 // Android), for behaviour only the bridge has: the text a selection reports,
-// which taps count as on a character, and the chapter a position is in. The
-// checks run in the page, not through taps, so they hold on both platforms
-// (taps don't reach WKWebView in a test). One reader per file: see
-// integration_test/shared/scroll_view_fixture.dart.
+// which taps count as on a character, the chapter a position is in, and
+// in-book search. The checks run in the page, not through taps, so they
+// hold on both platforms (taps don't reach WKWebView in a test). One reader
+// per file: see integration_test/shared/scroll_view_fixture.dart.
 
 import 'dart:convert';
 import 'dart:io';
@@ -14,6 +14,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
 import 'package:mekuru/features/library/data/repositories/book_repository.dart';
+import 'package:mekuru/features/reader/data/models/epub_models.dart';
 import 'package:mekuru/features/reader/data/repositories/bookmark_repository.dart';
 import 'package:mekuru/features/reader/presentation/widgets/custom_epub_viewer.dart';
 import 'package:path/path.dart' as p;
@@ -39,7 +40,9 @@ void main() {
     await cleanupAppBooksDir();
   });
 
-  testWidgets('selections, tap hits and chapter titles', (tester) async {
+  testWidgets('selections, tap hits, chapter titles and search', (
+    tester,
+  ) async {
     // Scroll view, where a tap on an empty spot shows the controls. The
     // book's own ruby only (the default FuriganaMode.book): no generated
     // furigana reflowing the page under the measurements below.
@@ -190,6 +193,88 @@ void main() {
       final saved = await bookmarks.getBookmarksForBook(bookId);
       expect(saved.single.chapterTitle, '第二章');
     }
+
+    // In-book search (searchBook), chapter by chapter, with chapter 2 on
+    // screen. Its searchProgress messages are captured here.
+    await controller.debugEvaluateJavascript(
+      '(function () {'
+      '  var send = window.callDart;'
+      '  window.callDart = function (name, data) {'
+      '    if (name === "searchProgress") window.__search.push(data);'
+      '    return send.apply(this, arguments);'
+      '  };'
+      '})()',
+    );
+    Future<List<dynamic>> search(String calls, int lastId) async {
+      await controller.debugEvaluateJavascript('window.__search = []; $calls');
+      for (var tick = 0; tick < 100; tick++) {
+        await tester.pump(const Duration(milliseconds: 100));
+        final messages =
+            (await evalJson(
+                  controller,
+                  'JSON.stringify({m: window.__search})',
+                ))['m']
+                as List<dynamic>;
+        if (messages.any((m) => m['id'] == lastId && m['done'] == true)) {
+          return messages;
+        }
+      }
+      fail('search $lastId never finished');
+    }
+
+    List<Map<String, dynamic>> hitsIn(List<dynamic> messages) => [
+      for (final message in messages)
+        for (final hit in (message['hits'] as List<dynamic>?) ?? const [])
+          {...hit as Map<String, dynamic>, 'toc': message['toc']},
+    ];
+
+    // A word split by ruby matches as it reads; its reading never does.
+    var messages = await search('searchBook(1, "羅生門")', 1);
+    var found = hitsIn(messages);
+    expect(found.map((hit) => hit['match']), ['羅生門']);
+    expect(chapterTitleFromPlacement(found.single['toc']), '第一章');
+    expect(messages.where((m) => m['done'] != true).map((m) => m['searched']), [
+      1,
+      2,
+    ], reason: 'one message per chapter');
+    final rashomon = found.single;
+    expect(hitsIn(await search('searchBook(2, "らしょう")', 2)), isEmpty);
+
+    // A word split by markup, and full-width letters for a half-width query.
+    found = hitsIn(await search('searchBook(3, "強調")', 3));
+    expect(found.map((hit) => hit['match']), ['強調']);
+    expect(chapterTitleFromPlacement(found.single['toc']), '第二章の後半');
+    found = hitsIn(await search('searchBook(4, "abc")', 4));
+    expect(found.map((hit) => hit['match']), ['ＡＢＣ']);
+
+    // A newer search ends the one before, which never reports done.
+    messages = await search('searchBook(5, "山"); searchBook(6, "門")', 6);
+    expect(messages.where((m) => m['id'] == 5 && m['done'] == true), isEmpty);
+    expect(hitsIn(messages.where((m) => m['id'] == 6).toList()), hasLength(1));
+
+    // Opening a hit shows its chapter and marks it for a moment.
+    controller.showSearchHit(rashomon['cfi'] as String, '羅生門');
+    var shownHit = <String, dynamic>{};
+    for (var tick = 0; tick < 50; tick++) {
+      await tester.pump(const Duration(milliseconds: 100));
+      shownHit = await evalJson(
+        controller,
+        'JSON.stringify({index: rendition.currentLocation().start'
+        ' ? rendition.currentLocation().start.index : -1,'
+        ' mark: _currentWordHighlightCfi})',
+      );
+      if (shownHit['mark'] != null) break;
+    }
+    expect(shownHit, {'index': 0, 'mark': rashomon['cfi']});
+    await tester.pump(const Duration(seconds: 3));
+    expect(
+      (await evalJson(
+        controller,
+        'JSON.stringify({mark: _currentWordHighlightCfi})',
+      ))['mark'],
+      isNull,
+      reason: 'the mark clears itself',
+    );
   });
 }
 
@@ -274,7 +359,9 @@ Future<String> _writeEpub(Directory dir) async {
       '<p id="c2-start">二章の始まり。</p>'
           '${filler * 3}'
           '<h2 id="anchor">後半</h2>'
-          '<p id="after-anchor">後半の文。</p>',
+          '<p id="after-anchor">後半の文。</p>'
+          // For search: a word split by markup, and full-width letters.
+          '<p>強<em>調</em>した語とＡＢＣの本。</p>',
     ),
   );
 

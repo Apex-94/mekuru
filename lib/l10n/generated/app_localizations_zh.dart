@@ -4256,6 +4256,31 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get lowRamModeOffHere => '低内存模式下已关闭';
+
+  @override
+  String get readerSearchTooltip => '在书中搜索';
+
+  @override
+  String get readerSearchHint => '搜索本书';
+
+  @override
+  String get readerSearchNoResults => '本书中没有匹配项';
+
+  @override
+  String readerSearchResultCount({required int count}) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count 个匹配项',
+      one: '1 个匹配项',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String readerSearchResultsCapped({required int count}) {
+    return '仅显示前 $count 个匹配项';
+  }
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hans`).
@@ -8510,4 +8535,29 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
 
   @override
   String get lowRamModeOffHere => '低内存模式下已关闭';
+
+  @override
+  String get readerSearchTooltip => '在书中搜索';
+
+  @override
+  String get readerSearchHint => '搜索本书';
+
+  @override
+  String get readerSearchNoResults => '本书中没有匹配项';
+
+  @override
+  String readerSearchResultCount({required int count}) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count 个匹配项',
+      one: '1 个匹配项',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String readerSearchResultsCapped({required int count}) {
+    return '仅显示前 $count 个匹配项';
+  }
 }

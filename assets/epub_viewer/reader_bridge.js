@@ -703,10 +703,15 @@ function previous() {
 }
 
 function toCfi(cfi) {
+  _displayCfi(cfi);
+}
+
+// toCfi, as a promise for the page being on screen.
+function _displayCfi(cfi) {
   unpinScroll();
-  if (!rendition) return;
+  if (!rendition) return Promise.resolve();
   _pendingNavChars = true;
-  rendition.display(cfi).then(function () {
+  return rendition.display(cfi).then(function () {
     requestAnimationFrame(function () {
       setTimeout(function () {
         snapToNearestPage();
@@ -718,21 +723,10 @@ function toCfi(cfi) {
 }
 
 function toProgress(progress) {
-  unpinScroll();
   if (book && book.locations) {
-    var cfi = book.locations.cfiFromPercentage(progress);
-    if (rendition) {
-      _pendingNavChars = true;
-      rendition.display(cfi).then(function () {
-        requestAnimationFrame(function () {
-          setTimeout(function () {
-            snapToNearestPage();
-          }, 0);
-        });
-      }).catch(function (err) {
-        console.error('[EPUB_BRIDGE] toProgress display failed: ' + err);
-      });
-    }
+    _displayCfi(book.locations.cfiFromPercentage(progress));
+  } else {
+    unpinScroll();
   }
 }
 
@@ -1279,22 +1273,183 @@ function setMargins(horizontal, vertical) {
 
 // ── Search ────────────────────────────────────────────────────────────
 
-function searchInBook(query) {
-  if (!book || !book.spine) {
-    callDart('searchResults', []);
-    return;
+// The search in progress; searchBook() stops when a newer one replaces it.
+var _searchId = 0;
+var SEARCH_MAX_HITS = 500;
+// Excerpt text either side of a match: little before, so the match shows
+// early in a results line.
+var SEARCH_BEFORE_CHARS = 12;
+var SEARCH_AFTER_CHARS = 40;
+
+// Searches the book for [query], one chapter at a time: each is parsed on
+// its own and dropped before the next, so memory holds one chapter beyond
+// what the reader shows. Sends Dart a searchProgress message per chapter
+// ({id, searched, total, hits, toc}) and a last one ({id, done, capped}).
+// A newer call ends this one (an empty query just stops it). Returns
+// nothing: a returned promise logs an error on iOS (flutter_inappwebview).
+function searchBook(id, query) {
+  _searchId = id;
+  _runSearch(id, foldForSearch(query));
+}
+
+async function _runSearch(id, needle) {
+  var found = 0;
+  try {
+    await book.ready;
+    // Linear chapters only, as locations: a jump into the others strands
+    // the reader.
+    var items = needle
+      ? book.spine.spineItems.filter(function (item) { return item.linear; })
+      : [];
+    for (var i = 0; i < items.length && found < SEARCH_MAX_HITS; i++) {
+      var hits = await _searchSection(items[i], needle, SEARCH_MAX_HITS - found);
+      if (_searchId !== id) return;
+      found += hits.length;
+      callDart('searchProgress', {
+        id: id,
+        searched: i + 1,
+        total: items.length,
+        hits: hits,
+        toc: hits.length ? _searchToc(hits[0].cfi) : null
+      });
+      // Let the page draw between chapters.
+      await new Promise(function (resolve) { setTimeout(resolve, 0); });
+      if (_searchId !== id) return;
+    }
+  } catch (e) {
+    console.error('[EPUB_BRIDGE] search failed: ' + e);
   }
-  Promise.all(
-    book.spine.spineItems.map(function (item) {
-      return item.load(book.load.bind(book))
-        .then(item.find.bind(item, query))
-        .finally(item.unload.bind(item));
+  if (_searchId === id) {
+    callDart('searchProgress', {
+      id: id,
+      done: true,
+      capped: found >= SEARCH_MAX_HITS
+    });
+  }
+}
+
+// One chapter's matches (see _searchDocument); none when it can't be read.
+async function _searchSection(item, needle, limit) {
+  try {
+    // Never item.load()/unload(): the section caches its document, and an
+    // unload clears a load the reader or locations has in flight. The
+    // document book.load() parses for us alone is freed once this returns.
+    var doc = item.document ||
+      await _withTimeout(book.load(item.url), 10000);
+    return _searchDocument(doc, item, needle, limit);
+  } catch (e) {
+    console.warn('[EPUB_BRIDGE] search: skipping section ' + item.index +
+      ': ' + (e && e.message || e));
+    return [];
+  }
+}
+
+// ponytail: a chapter whose zip entry never settles (a corrupt archive) is
+// skipped after [ms]; its parse may still finish in the background.
+function _withTimeout(promise, ms) {
+  var timer;
+  return Promise.race([
+    promise,
+    new Promise(function (resolve, reject) {
+      timer = setTimeout(function () { reject(new Error('timed out')); }, ms);
     })
-  ).then(function (results) {
-    var flat = [].concat.apply([], results);
-    callDart('searchResults', flat);
-  }).catch(function () {
-    callDart('searchResults', []);
+  ]).finally(function () {
+    // Pending, the timer would keep the parsed chapter reachable until it
+    // fired: every chapter of the last 10 s alive at once.
+    clearTimeout(timer);
+  });
+}
+
+function _searchToc(cfi) {
+  try {
+    return tocPlacement(cfi);
+  } catch (e) {
+    return null;
+  }
+}
+
+// Folds text for matching one UTF-16 unit for one, so an index into the
+// folded text is an index into the original: full-width ASCII to ASCII,
+// the ideographic space to a space, ASCII letters to lowercase.
+function foldForSearch(text) {
+  return text.replace(/[\uFF01-\uFF5E\u3000A-Z]/g, function (c) {
+    var code = c.charCodeAt(0);
+    if (code === 0x3000) return ' ';
+    if (code > 0xFF00) code -= 0xFEE0;
+    return String.fromCharCode(code).toLowerCase();
+  });
+}
+
+// The matches of [needle] (folded) in [doc], a chapter of [section], at
+// most [limit]: {cfi, before, match, after}. Ruby readings are not text
+// here, so a word split by ruby matches as it reads and its furigana never
+// does; neither do script and style contents.
+function _searchDocument(doc, section, needle, limit) {
+  var body = doc.body || doc.getElementsByTagName('body')[0];
+  if (!body) return [];
+  var nodes = [];
+  var starts = [];
+  var parts = [];
+  var length = 0;
+  var walker = doc.createTreeWalker(body, NodeFilter.SHOW_TEXT, null, false);
+  var node;
+  while ((node = walker.nextNode())) {
+    var value = node.nodeValue;
+    var parent = node.parentNode.localName;
+    if (!/\S/.test(value) || parent === 'script' || parent === 'style' ||
+        isInRubyAnnotation(node, body)) {
+      continue;
+    }
+    nodes.push(node);
+    starts.push(length);
+    parts.push(value);
+    length += value.length;
+  }
+  var text = parts.join('');
+  var folded = foldForSearch(text);
+  var hits = [];
+  // Matches come in text order, so the nodes they start and end in only
+  // move forward.
+  var first = 0;
+  var last = 0;
+  var at = folded.indexOf(needle);
+  while (at !== -1 && hits.length < limit) {
+    var end = at + needle.length;
+    while (first + 1 < nodes.length && starts[first + 1] <= at) first++;
+    if (last < first) last = first;
+    while (last + 1 < nodes.length && starts[last + 1] < end) last++;
+    var range = doc.createRange();
+    range.setStart(nodes[first], at - starts[first]);
+    range.setEnd(nodes[last], end - starts[last]);
+    hits.push({
+      cfi: section.cfiFromRange(range),
+      before: _excerpt(text, at - SEARCH_BEFORE_CHARS, at),
+      match: text.slice(at, end),
+      after: _excerpt(text, end, end + SEARCH_AFTER_CHARS)
+    });
+    at = folded.indexOf(needle, end);
+  }
+  return hits;
+}
+
+// text[from, to) with its whitespace collapsed, widened rather than cut
+// through a surrogate pair.
+function _excerpt(text, from, to) {
+  from = Math.max(0, from);
+  to = Math.min(text.length, to);
+  if (from > 0 && /[\uDC00-\uDFFF]/.test(text.charAt(from))) from--;
+  if (to < text.length && /[\uDC00-\uDFFF]/.test(text.charAt(to))) to++;
+  return text.slice(from, to).replace(/\s+/g, ' ');
+}
+
+// Shows a search hit (a range CFI from searchBook) and marks it for a
+// moment.
+function showSearchHit(cfi, text) {
+  _displayCfi(cfi).then(function () {
+    if (!_markWord(cfi, text)) return;
+    setTimeout(function () {
+      if (_currentWordHighlightCfi === cfi) clearWordHighlight();
+    }, 2500);
   });
 }
 
@@ -1742,7 +1897,8 @@ function getBlockTextWithoutRt(block) {
 function isInRubyAnnotation(node, root) {
   var p = node.parentElement;
   while (p && p !== root) {
-    if (p.tagName === 'RT' || p.tagName === 'RP') return true;
+    // localName: lowercase in XHTML documents too, unlike tagName.
+    if (p.localName === 'rt' || p.localName === 'rp') return true;
     p = p.parentElement;
   }
   return false;
@@ -1826,14 +1982,27 @@ function highlightWordInBlock(blockCharStart, wordLength) {
     if (contents && contents.length > 0) {
       var cfi = contents[0].cfiFromRange(range);
       if (cfi) {
-        addHighlight(cfi, '#4FC3F7', '0.4');
-        _currentWordHighlightCfi = cfi;
+        _markWord(cfi);
         console.log('[EPUB_BRIDGE] highlighted word CFI: ' + cfi);
       }
     }
   } catch (e) {
     console.error('[EPUB_BRIDGE] highlightWordInBlock error:', e);
   }
+}
+
+// Marks [cfi] in the word-highlight slot (the tapped word, a search hit)
+// and says whether it did: not over the reader's own highlight of that very
+// range, which clearing the slot would remove. [text] as for addHighlight.
+function _markWord(cfi, text) {
+  clearWordHighlight();
+  if (!rendition ||
+      rendition.annotations._annotations[encodeURI(cfi + 'highlight')]) {
+    return false;
+  }
+  addHighlight(cfi, '#4FC3F7', '0.4', text);
+  _currentWordHighlightCfi = cfi;
+  return true;
 }
 
 function clearWordHighlight() {

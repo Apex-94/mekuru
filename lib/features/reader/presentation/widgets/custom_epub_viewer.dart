@@ -93,6 +93,7 @@ class CustomEpubViewer extends StatefulWidget {
     this.onRendererGone,
     this.onPageCharacters,
     this.onPageKey,
+    this.onSearchProgress,
     this.userFont,
     this.onUserFontFailed,
   });
@@ -193,6 +194,10 @@ class CustomEpubViewer extends StatefulWidget {
   /// A page-turn key the page itself received; [key] is its DOM name, e.g.
   /// `ArrowLeft` (see `forwardPageTurnKey` in reader_bridge.js).
   final void Function(String key, bool shift)? onPageKey;
+
+  /// A `searchProgress` message from the bridge's `searchBook` (see
+  /// `BookSearchSession.onProgress`).
+  final ValueChanged<Map<dynamic, dynamic>>? onSearchProgress;
 
   /// Test-only: viewers ignore the page's `readyToLoad` call, standing in for
   /// it being lost (seen after an Activity pause/resume).
@@ -452,12 +457,11 @@ class _CustomEpubViewerState extends State<CustomEpubViewer> {
     );
 
     controller.addJavaScriptHandler(
-      handlerName: 'searchResults',
+      handlerName: 'searchProgress',
       callback: (data) {
-        final results = data.isNotEmpty && data[0] is List
-            ? data[0] as List<dynamic>
-            : <dynamic>[];
-        widget.controller.completeSearch(results);
+        if (data.isNotEmpty && data[0] is Map) {
+          widget.onSearchProgress?.call(data[0] as Map);
+        }
       },
     );
 

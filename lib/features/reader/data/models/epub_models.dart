@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 /// Location within an EPUB document.
 class EpubLocation {
   final String startCfi;
@@ -93,4 +95,18 @@ String pickChapterTitle(int spine, List<TocPlacement> toc) {
     title = entry.title;
   }
   return title;
+}
+
+/// [pickChapterTitle] for a `tocPlacement` result from reader_bridge.js: a
+/// JSON string, or the map it decodes to.
+String chapterTitleFromPlacement(Object? raw) {
+  final placement = (raw is String ? jsonDecode(raw) : raw) as Map;
+  return pickChapterTitle(placement['spine'] as int, [
+    for (final entry in placement['toc'] as List)
+      (
+        title: entry[0] as String,
+        spine: entry[1] as int,
+        anchorAfter: entry[2] as bool?,
+      ),
+  ]);
 }

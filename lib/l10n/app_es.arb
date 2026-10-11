@@ -3227,5 +3227,10 @@
   "lowRamModeNotNow": "Ahora no",
   "lowRamModeCloseBody": "El diccionario de furigana mejorado ocupa unos 250 MB de memoria hasta que Mekuru se cierra. Cierra Mekuru ahora para liberarla y vuelve a abrirlo.",
   "lowRamModeCloseNow": "Cerrar Mekuru ahora",
-  "lowRamModeOffHere": "Desactivado en el modo de poca RAM"
+  "lowRamModeOffHere": "Desactivado en el modo de poca RAM",
+  "readerSearchTooltip": "Buscar en el libro",
+  "readerSearchHint": "Buscar en este libro",
+  "readerSearchNoResults": "No hay coincidencias en este libro",
+  "readerSearchResultCount": "{count, plural, =1{1 coincidencia} other{{count} coincidencias}}",
+  "readerSearchResultsCapped": "Se muestran las primeras {count} coincidencias"
 }

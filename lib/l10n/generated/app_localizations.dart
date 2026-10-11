@@ -7241,6 +7241,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Off in Low RAM mode'**
   String get lowRamModeOffHere;
+
+  /// Tooltip of the reader's top-bar button that opens in-book search.
+  ///
+  /// In en, this message translates to:
+  /// **'Search in book'**
+  String get readerSearchTooltip;
+
+  /// Hint in the in-book search field.
+  ///
+  /// In en, this message translates to:
+  /// **'Search this book'**
+  String get readerSearchHint;
+
+  /// In-book search found nothing.
+  ///
+  /// In en, this message translates to:
+  /// **'No matches in this book'**
+  String get readerSearchNoResults;
+
+  /// How many matches in-book search has found (so far, while it is still searching).
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 match} other{{count} matches}}'**
+  String readerSearchResultCount({required int count});
+
+  /// In-book search stopped at its limit of {count} matches.
+  ///
+  /// In en, this message translates to:
+  /// **'Showing the first {count} matches'**
+  String readerSearchResultsCapped({required int count});
 }
 
 class _AppLocalizationsDelegate
