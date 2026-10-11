@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mekuru/features/reader/data/services/book_search_session.dart';
+import 'package:mekuru/features/settings/presentation/providers/app_settings_providers.dart';
 import 'package:mekuru/l10n/l10n.dart';
 
 /// Opens in-book search over the reader. Tapping a hit closes it and passes
@@ -19,9 +21,10 @@ Future<void> showBookSearchSheet(
 }
 
 /// A search field over the hits [session] finds, which stream in chapter by
-/// chapter. The session outlives the sheet, so reopening it shows the same
+/// chapter, at the lookup font size (the app's text size for reading outside
+/// the book). The session outlives the sheet, so reopening it shows the same
 /// results where the list was left.
-class BookSearchSheet extends StatefulWidget {
+class BookSearchSheet extends ConsumerStatefulWidget {
   const BookSearchSheet({
     super.key,
     required this.session,
@@ -32,10 +35,10 @@ class BookSearchSheet extends StatefulWidget {
   final ValueChanged<BookSearchHit> onOpenHit;
 
   @override
-  State<BookSearchSheet> createState() => _BookSearchSheetState();
+  ConsumerState<BookSearchSheet> createState() => _BookSearchSheetState();
 }
 
-class _BookSearchSheetState extends State<BookSearchSheet> {
+class _BookSearchSheetState extends ConsumerState<BookSearchSheet> {
   late final _query = TextEditingController(text: widget.session.query);
   late final ScrollController _list = ScrollController(
     initialScrollOffset: widget.session.listOffset,
@@ -59,6 +62,7 @@ class _BookSearchSheetState extends State<BookSearchSheet> {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final media = MediaQuery.of(context);
+    final fontSize = ref.watch(lookupFontSizeProvider);
     return Padding(
       padding: EdgeInsets.only(bottom: media.viewInsets.bottom),
       child: SizedBox(
@@ -142,7 +146,8 @@ class _BookSearchSheetState extends State<BookSearchSheet> {
                                     TextSpan(text: hit.after),
                                   ],
                                 ),
-                                maxLines: 2,
+                                style: TextStyle(fontSize: fontSize),
+                                maxLines: 3,
                                 overflow: TextOverflow.ellipsis,
                               ),
                               subtitle: hit.chapter.isEmpty

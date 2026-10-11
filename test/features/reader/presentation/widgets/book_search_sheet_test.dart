@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mekuru/features/reader/data/services/book_search_session.dart';
 import 'package:mekuru/features/reader/presentation/widgets/book_search_sheet.dart';
+import 'package:mekuru/features/settings/presentation/providers/app_settings_providers.dart';
 import 'package:mekuru/l10n/generated/app_localizations_en.dart';
 
 import '../../../../test_app.dart';
@@ -33,16 +35,19 @@ void main() {
   /// has a route to close.
   Future<void> openSheet(WidgetTester tester) async {
     await tester.pumpWidget(
-      buildLocalizedTestApp(
-        home: Builder(
-          builder: (context) => Scaffold(
-            body: TextButton(
-              onPressed: () => showBookSearchSheet(
-                context,
-                session: session,
-                onOpenHit: opened.add,
+      ProviderScope(
+        overrides: [lookupFontSizeProvider.overrideWithBuild((ref, _) => 28)],
+        child: buildLocalizedTestApp(
+          home: Builder(
+            builder: (context) => Scaffold(
+              body: TextButton(
+                onPressed: () => showBookSearchSheet(
+                  context,
+                  session: session,
+                  onOpenHit: opened.add,
+                ),
+                child: const Text('open'),
               ),
-              child: const Text('open'),
             ),
           ),
         ),
@@ -80,14 +85,19 @@ void main() {
 
     expect(find.text(en.readerSearchResultCount(count: 2)), findsOneWidget);
     expect(find.text('第二章'), findsNWidgets(2));
-    TextSpan? match;
-    tester
+    final hitText = tester
         .widget<RichText>(find.textContaining('前の文4', findRichText: true))
-        .text
-        .visitChildren((span) {
-          if (span is TextSpan && span.text == '羅生門') match = span;
-          return match == null;
-        });
+        .text;
+    expect(
+      hitText.style?.fontSize,
+      28,
+      reason: 'hits follow the lookup font size',
+    );
+    TextSpan? match;
+    hitText.visitChildren((span) {
+      if (span is TextSpan && span.text == '羅生門') match = span;
+      return match == null;
+    });
     expect(match?.style?.fontWeight, FontWeight.bold);
 
     await tester.tap(find.textContaining('前の文4', findRichText: true));
