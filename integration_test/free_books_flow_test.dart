@@ -107,7 +107,11 @@ void main() {
     if (!await dir.exists()) return;
     for (final entity in dir.listSync()) {
       if (!booksBefore.contains(entity.path)) {
-        entity.deleteSync(recursive: true);
+        try {
+          entity.deleteSync(recursive: true);
+        } catch (_) {
+          // Best-effort: the reader may still be writing into the folder.
+        }
       }
     }
   });
