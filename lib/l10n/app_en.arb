@@ -20,6 +20,59 @@
   "@navYou": {
     "description": "Bottom navigation label and title of the You tab: a hub with cards for Free books, Reading stats and Settings."
   },
+  "navRecent": "Recent",
+  "@navRecent": {
+    "description": "Bottom navigation label for the optional Recently read tab. Keep it short."
+  },
+  "navStats": "Stats",
+  "@navStats": {
+    "description": "Bottom navigation label for the optional Reading stats tab. Keep it short."
+  },
+  "navFreeBooks": "Free books",
+  "@navFreeBooks": {
+    "description": "Bottom navigation label for the optional Free books tab. Keep it short."
+  },
+  "recentlyReadTitle": "Recently read",
+  "@recentlyReadTitle": {
+    "description": "Title of the Recently read tab: every book the user has opened, most recent first."
+  },
+  "recentlyReadEmpty": "Books you open will appear here.",
+  "@recentlyReadEmpty": {
+    "description": "Shown on the Recently read tab before any book has been opened."
+  },
+  "recentlyReadDaysAgo": "{count, plural, =0{Today} =1{Yesterday} other{{count} days ago}}",
+  "@recentlyReadDaysAgo": {
+    "description": "When a book on the Recently read tab was last opened, in whole days.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "settingsNavBarTitle": "Navigation bar",
+  "@settingsNavBarTitle": {
+    "description": "Settings row that opens the screen for choosing and ordering the bottom navigation tabs."
+  },
+  "navBarEditorHint": "Drag to reorder. Up to 5 tabs. Library is always shown.",
+  "@navBarEditorHint": {
+    "description": "Hint at the top of the navigation bar settings screen."
+  },
+  "navBarLibraryNote": "Always shown",
+  "@navBarLibraryNote": {
+    "description": "Note under the Library tab in the navigation bar settings: it cannot be hidden."
+  },
+  "navBarDictionaryNote": "Lookups while reading still work without this tab.",
+  "@navBarDictionaryNote": {
+    "description": "Note under the Dictionary tab's switch in the navigation bar settings."
+  },
+  "navBarVocabularyNote": "Saved words are kept, but the list and CSV export are only in this tab.",
+  "@navBarVocabularyNote": {
+    "description": "Note under the Vocabulary tab's switch in the navigation bar settings."
+  },
+  "navBarYouNote": "With You and Settings both hidden, Settings is in Library's top bar.",
+  "@navBarYouNote": {
+    "description": "Note under the You tab's switch in the navigation bar settings: hiding both the You and Settings tabs puts a Settings button in the library's app bar."
+  },
   "commonHelp": "Help",
   "@commonHelp": {
     "description": "Tooltip or button label for help."
@@ -1131,14 +1184,6 @@
   "settingsStartupScreenTitle": "Startup Screen",
   "@settingsStartupScreenTitle": {
     "description": "Title for the startup screen setting."
-  },
-  "settingsStartupScreenLibrary": "Library",
-  "@settingsStartupScreenLibrary": {
-    "description": "Label for the library startup screen option."
-  },
-  "settingsStartupScreenDictionary": "Dictionary",
-  "@settingsStartupScreenDictionary": {
-    "description": "Label for the dictionary startup screen option."
   },
   "settingsStartupScreenLastRead": "Last Read Book",
   "@settingsStartupScreenLastRead": {

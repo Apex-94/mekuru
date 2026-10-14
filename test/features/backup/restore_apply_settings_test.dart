@@ -7,6 +7,10 @@ import 'package:shared_preferences/shared_preferences.dart';
 /// `restoreSettings` so the boot-time full restore can write preferences
 /// before any `AppDatabase` exists.
 void main() {
+  // JSON text, so it survives the backup's JSON round trip (a string list
+  // comes back as List<dynamic> and is dropped).
+  const homeTabs = '{"order":["recent","library"],"hidden":[]}';
+
   test('applySettings writes typed values for app and reader keys', () async {
     SharedPreferences.setMockInitialValues({});
     final prefs = await SharedPreferences.getInstance();
@@ -19,6 +23,7 @@ void main() {
           'app.lookup_font_size': 18.0,
           'app.filter_roman_letters': true,
           'app.auto_crop_white_threshold': 240,
+          'app.home_tabs': homeTabs,
         },
         reader: {'reader.font_size': 22.0, 'reader.keep_screen_on': false},
       ),
@@ -28,6 +33,7 @@ void main() {
     expect(prefs.getDouble('app.lookup_font_size'), 18.0);
     expect(prefs.getBool('app.filter_roman_letters'), isTrue);
     expect(prefs.getInt('app.auto_crop_white_threshold'), 240);
+    expect(prefs.getString('app.home_tabs'), homeTabs);
     expect(prefs.getDouble('reader.font_size'), 22.0);
     expect(prefs.getBool('reader.keep_screen_on'), isFalse);
   });

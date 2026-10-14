@@ -113,6 +113,19 @@ final booksProvider = StreamProvider<List<Book>>((ref) {
   });
 });
 
+/// Every book opened at least once, most recently read first, whatever the
+/// library's sort: the Recent tab. Derived from [booksProvider], which the
+/// Library tab keeps alive, so the rows are read once.
+final recentlyReadBooksProvider = Provider.autoDispose<AsyncValue<List<Book>>>(
+  (ref) => ref
+      .watch(booksProvider)
+      .whenData(
+        (books) =>
+            books.where((book) => book.lastReadAt != null).toList()
+              ..sort((a, b) => b.lastReadAt!.compareTo(a.lastReadAt!)),
+      ),
+);
+
 /// State for book import progress.
 class BookImportState {
   final bool isImporting;

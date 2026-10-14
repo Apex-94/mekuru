@@ -966,14 +966,6 @@
   "@settingsStartupScreenTitle": {
     "description": "Title for the startup screen setting."
   },
-  "settingsStartupScreenLibrary": "Biblioteca",
-  "@settingsStartupScreenLibrary": {
-    "description": "Label for the library startup screen option."
-  },
-  "settingsStartupScreenDictionary": "Diccionario",
-  "@settingsStartupScreenDictionary": {
-    "description": "Label for the dictionary startup screen option."
-  },
   "settingsStartupScreenLastRead": "Último libro leído",
   "@settingsStartupScreenLastRead": {
     "description": "Label for the last-read-book startup screen option."
@@ -3237,5 +3229,17 @@
   "mangaDetectSpreadsTitle": "Detectar páginas dobles",
   "mangaDetectSpreadsSubtitle": "Muestra solas las páginas anchas en la vista de dos páginas",
   "mangaShiftSpreadsTitle": "Desplazar las parejas una página",
-  "mangaShiftSpreadsSubtitle": "Para libros cuyas páginas se emparejan mal"
+  "mangaShiftSpreadsSubtitle": "Para libros cuyas páginas se emparejan mal",
+  "navRecent": "Recientes",
+  "navStats": "Estadísticas",
+  "navFreeBooks": "Libros gratis",
+  "recentlyReadTitle": "Leídos recientemente",
+  "recentlyReadEmpty": "Los libros que abras aparecerán aquí.",
+  "recentlyReadDaysAgo": "{count, plural, =0{Hoy} =1{Ayer} other{Hace {count} días}}",
+  "settingsNavBarTitle": "Barra de navegación",
+  "navBarEditorHint": "Arrastra para cambiar el orden. Hasta 5 pestañas. Biblioteca siempre se muestra.",
+  "navBarLibraryNote": "Siempre visible",
+  "navBarDictionaryNote": "Las consultas mientras lees siguen funcionando sin esta pestaña.",
+  "navBarVocabularyNote": "Tus palabras guardadas se conservan, pero la lista y la exportación CSV solo están en esta pestaña.",
+  "navBarYouNote": "Si ocultas Tú y Configuración, Configuración aparece en la barra superior de Biblioteca."
 }

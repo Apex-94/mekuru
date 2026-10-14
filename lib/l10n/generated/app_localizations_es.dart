@@ -24,6 +24,55 @@ class AppLocalizationsEs extends AppLocalizations {
   String get navYou => 'Tú';
 
   @override
+  String get navRecent => 'Recientes';
+
+  @override
+  String get navStats => 'Estadísticas';
+
+  @override
+  String get navFreeBooks => 'Libros gratis';
+
+  @override
+  String get recentlyReadTitle => 'Leídos recientemente';
+
+  @override
+  String get recentlyReadEmpty => 'Los libros que abras aparecerán aquí.';
+
+  @override
+  String recentlyReadDaysAgo({required int count}) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Hace $count días',
+      one: 'Ayer',
+      zero: 'Hoy',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get settingsNavBarTitle => 'Barra de navegación';
+
+  @override
+  String get navBarEditorHint =>
+      'Arrastra para cambiar el orden. Hasta 5 pestañas. Biblioteca siempre se muestra.';
+
+  @override
+  String get navBarLibraryNote => 'Siempre visible';
+
+  @override
+  String get navBarDictionaryNote =>
+      'Las consultas mientras lees siguen funcionando sin esta pestaña.';
+
+  @override
+  String get navBarVocabularyNote =>
+      'Tus palabras guardadas se conservan, pero la lista y la exportación CSV solo están en esta pestaña.';
+
+  @override
+  String get navBarYouNote =>
+      'Si ocultas Tú y Configuración, Configuración aparece en la barra superior de Biblioteca.';
+
+  @override
   String get commonHelp => 'Ayuda';
 
   @override
@@ -880,12 +929,6 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get settingsStartupScreenTitle => 'Pantalla de inicio';
-
-  @override
-  String get settingsStartupScreenLibrary => 'Biblioteca';
-
-  @override
-  String get settingsStartupScreenDictionary => 'Diccionario';
 
   @override
   String get settingsStartupScreenLastRead => 'Último libro leído';

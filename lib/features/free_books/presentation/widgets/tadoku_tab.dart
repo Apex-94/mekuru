@@ -8,6 +8,7 @@ import 'package:mekuru/l10n/generated/app_localizations.dart';
 import 'package:mekuru/l10n/l10n.dart';
 import 'package:mekuru/shared/utils/haptics.dart';
 import 'package:mekuru/shared/widgets/download_status.dart';
+import 'package:mekuru/shared/widgets/glass_tab_bar.dart';
 
 /// Graded readers by NPO Tadoku Supporters: level chips, search and a grid
 /// of covers.
@@ -33,7 +34,12 @@ class TadokuTab extends ConsumerWidget {
             data: (books) => books.isEmpty
                 ? const FreeBooksNoResults()
                 : GridView.builder(
-                    padding: const EdgeInsets.fromLTRB(16, 4, 16, 16),
+                    padding: EdgeInsets.fromLTRB(
+                      16,
+                      4,
+                      16,
+                      16 + glassTabBarInset(context),
+                    ),
                     gridDelegate:
                         const SliverGridDelegateWithFixedCrossAxisCount(
                           crossAxisCount: 3,

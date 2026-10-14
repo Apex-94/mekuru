@@ -451,6 +451,12 @@ class RestoreService {
     if (colorTheme is String) {
       PreloadedAppSettings.setColorThemeName(colorTheme);
     }
+
+    final homeTabs =
+        appSettings[SharedPreferencesAppSettingsStorage.homeTabsKey];
+    if (homeTabs is String) {
+      PreloadedAppSettings.initialHomeTabs = homeTabs;
+    }
   }
 
   static Future<void> _writePrefsValue(

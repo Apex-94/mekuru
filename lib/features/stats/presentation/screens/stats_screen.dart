@@ -11,6 +11,7 @@ import 'package:mekuru/features/stats/presentation/widgets/reading_time_card.dar
 import 'package:mekuru/features/stats/presentation/widgets/vocab_growth_card.dart';
 import 'package:mekuru/features/stats/presentation/widgets/volume_card.dart';
 import 'package:mekuru/l10n/l10n.dart';
+import 'package:mekuru/shared/widgets/glass_tab_bar.dart';
 
 /// Reading statistics: headline numbers first, then the filters, then the
 /// chart cards.
@@ -133,7 +134,8 @@ class StatsScreen extends ConsumerWidget {
     // page is a small fixed set of children, so building them all is cheaper
     // than keep-alive plumbing on every entrance animation.
     body: SingleChildScrollView(
-      padding: const EdgeInsets.symmetric(vertical: 16),
+      // Clears the floating glass bar when this is a tab.
+      padding: EdgeInsets.only(top: 16, bottom: 16 + glassTabBarInset(context)),
       child: Column(
         // Matches the tight cross-axis constraints ListView handed down.
         crossAxisAlignment: CrossAxisAlignment.stretch,

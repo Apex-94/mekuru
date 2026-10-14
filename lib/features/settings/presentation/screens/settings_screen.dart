@@ -15,6 +15,8 @@ import 'package:mekuru/features/reader/presentation/providers/gemma_download_pro
 import 'package:mekuru/features/reader/presentation/widgets/translation_memory_warning.dart';
 import 'package:mekuru/features/settings/data/services/app_settings_storage.dart';
 import 'package:mekuru/features/settings/presentation/providers/app_settings_providers.dart';
+import 'package:mekuru/features/settings/presentation/screens/navigation_bar_settings_screen.dart';
+import 'package:mekuru/features/settings/presentation/widgets/home_tab_ui.dart';
 import 'package:mekuru/features/settings/presentation/widgets/low_ram_mode_prompts.dart';
 import 'package:mekuru/features/sync/presentation/screens/server_settings_screen.dart';
 import 'package:mekuru/features/wanikani/presentation/providers/wanikani_providers.dart';
@@ -50,7 +52,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     final appLanguage = ref.watch(appLanguageProvider);
     final themeMode = ref.watch(appThemeModeProvider);
     final colorTheme = ref.watch(appColorThemeProvider);
-    final startupScreen = ref.watch(startupScreenProvider);
+    final homeTabs = ref.watch(homeTabsProvider);
+    final startupScreen = ref.watch(effectiveStartupScreenProvider);
     final lookupFontSize = ref.watch(lookupFontSizeProvider);
     final lowRamMode = ref.watch(lowRamModeProvider);
     final (wanikaniLinked, wanikaniUsername) = ref.watch(
@@ -93,6 +96,26 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             onTap: () {
               AppHaptics.light();
               _showStartupScreenPicker(startupScreen);
+            },
+          ),
+          ListTile(
+            leading: Icon(
+              Icons.call_to_action_outlined,
+              color: theme.colorScheme.primary,
+            ),
+            title: Text(l10n.settingsNavBarTitle),
+            subtitle: Text(
+              homeTabs.visible.map((tab) => tab.label(l10n)).join(', '),
+            ),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () {
+              AppHaptics.light();
+              Navigator.of(context).push(
+                namedRoute(
+                  'navigation_bar',
+                  (_) => const NavigationBarSettingsScreen(),
+                ),
+              );
             },
           ),
           if (defaultTargetPlatform == TargetPlatform.android)
@@ -501,11 +524,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   static String _startupScreenLabel(
     AppLocalizations l10n,
     StartupScreen screen,
-  ) => switch (screen) {
-    StartupScreen.library => l10n.settingsStartupScreenLibrary,
-    StartupScreen.dictionary => l10n.settingsStartupScreenDictionary,
-    StartupScreen.lastRead => l10n.settingsStartupScreenLastRead,
-  };
+  ) => screen == StartupScreen.lastRead
+      ? l10n.settingsStartupScreenLastRead
+      : screen.tab.label(l10n);
 
   static String _currentAppLanguageLabel(
     AppLocalizations l10n,
@@ -646,7 +667,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     showSettingsOptionPickerSheet(
       context: context,
       title: l10n.settingsStartupScreenTitle,
-      values: StartupScreen.values,
+      // Only the tabs the bar shows, in its order.
+      values: [
+        ...ref.read(homeTabsProvider).visible.map(StartupScreen.forTab),
+        StartupScreen.lastRead,
+      ],
       selected: current,
       labelOf: (option) => _startupScreenLabel(l10n, option),
       iconOf: _startupScreenIcon,
@@ -770,9 +795,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     );
   }
 
-  static IconData _startupScreenIcon(StartupScreen screen) => switch (screen) {
-    StartupScreen.library => Icons.auto_stories_outlined,
-    StartupScreen.dictionary => Icons.book_outlined,
-    StartupScreen.lastRead => Icons.menu_book_outlined,
-  };
+  static IconData _startupScreenIcon(StartupScreen screen) =>
+      screen == StartupScreen.lastRead
+      ? Icons.menu_book_outlined
+      : screen.tab.icon;
 }

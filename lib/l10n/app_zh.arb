@@ -966,14 +966,6 @@
   "@settingsStartupScreenTitle": {
     "description": "Title for the startup screen setting."
   },
-  "settingsStartupScreenLibrary": "书库",
-  "@settingsStartupScreenLibrary": {
-    "description": "Label for the library startup screen option."
-  },
-  "settingsStartupScreenDictionary": "词典",
-  "@settingsStartupScreenDictionary": {
-    "description": "Label for the dictionary startup screen option."
-  },
   "settingsStartupScreenLastRead": "上次阅读",
   "@settingsStartupScreenLastRead": {
     "description": "Label for the last-read-book startup screen option."
@@ -3237,5 +3229,17 @@
   "mangaDetectSpreadsTitle": "检测跨页",
   "mangaDetectSpreadsSubtitle": "在双页模式中单独显示宽页面",
   "mangaShiftSpreadsTitle": "配对后移一页",
-  "mangaShiftSpreadsSubtitle": "适用于页面配对错误的书"
+  "mangaShiftSpreadsSubtitle": "适用于页面配对错误的书",
+  "navRecent": "最近",
+  "navStats": "统计",
+  "navFreeBooks": "免费书籍",
+  "recentlyReadTitle": "最近阅读",
+  "recentlyReadEmpty": "你打开过的书会显示在这里。",
+  "recentlyReadDaysAgo": "{count, plural, =0{今天} =1{昨天} other{{count} 天前}}",
+  "settingsNavBarTitle": "导航栏",
+  "navBarEditorHint": "拖动可调整顺序。最多 5 个标签页。书库始终显示。",
+  "navBarLibraryNote": "始终显示",
+  "navBarDictionaryNote": "没有此标签页时，阅读中查词仍然可用。",
+  "navBarVocabularyNote": "已保存的单词会保留，但单词列表和 CSV 导出只在此标签页中。",
+  "navBarYouNote": "同时隐藏“我的”和“设置”时，设置会出现在书库的顶部栏中。"
 }

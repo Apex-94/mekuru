@@ -39,6 +39,7 @@ import 'package:mekuru/features/manga/presentation/widgets/ocr_progress_overlay.
 import 'package:mekuru/features/backup/presentation/screens/backup_settings_screen.dart';
 import 'package:mekuru/features/settings/presentation/providers/app_settings_providers.dart';
 import 'package:mekuru/features/settings/presentation/screens/downloads_screen.dart';
+import 'package:mekuru/features/settings/presentation/screens/settings_screen.dart';
 import 'package:mekuru/features/settings/presentation/widgets/low_ram_mode_prompts.dart';
 import 'package:mekuru/features/settings/presentation/widgets/starter_pack_card.dart';
 import 'package:mekuru/features/sync/presentation/providers/sync_providers.dart';
@@ -209,6 +210,18 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen> {
                     _showSortPicker(context, ref, sortOrder);
                   },
                 ),
+                // The way into Settings (and back to its tabs) when the bar
+                // has none.
+                if (!ref.watch(
+                  homeTabsProvider.select((layout) => layout.settingsInBar),
+                ))
+                  IconButton(
+                    icon: const Icon(Icons.settings_outlined),
+                    tooltip: l10n.settingsTitle,
+                    onPressed: () => Navigator.of(context).push(
+                      namedRoute('settings', (_) => const SettingsScreen()),
+                    ),
+                  ),
               ],
             ),
       floatingActionButton: _isSelectionMode

@@ -24,6 +24,51 @@ class AppLocalizationsZh extends AppLocalizations {
   String get navYou => '我的';
 
   @override
+  String get navRecent => '最近';
+
+  @override
+  String get navStats => '统计';
+
+  @override
+  String get navFreeBooks => '免费书籍';
+
+  @override
+  String get recentlyReadTitle => '最近阅读';
+
+  @override
+  String get recentlyReadEmpty => '你打开过的书会显示在这里。';
+
+  @override
+  String recentlyReadDaysAgo({required int count}) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count 天前',
+      one: '昨天',
+      zero: '今天',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get settingsNavBarTitle => '导航栏';
+
+  @override
+  String get navBarEditorHint => '拖动可调整顺序。最多 5 个标签页。书库始终显示。';
+
+  @override
+  String get navBarLibraryNote => '始终显示';
+
+  @override
+  String get navBarDictionaryNote => '没有此标签页时，阅读中查词仍然可用。';
+
+  @override
+  String get navBarVocabularyNote => '已保存的单词会保留，但单词列表和 CSV 导出只在此标签页中。';
+
+  @override
+  String get navBarYouNote => '同时隐藏“我的”和“设置”时，设置会出现在书库的顶部栏中。';
+
+  @override
   String get commonHelp => '帮助';
 
   @override
@@ -833,12 +878,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get settingsStartupScreenTitle => '启动界面';
-
-  @override
-  String get settingsStartupScreenLibrary => '书库';
-
-  @override
-  String get settingsStartupScreenDictionary => '词典';
 
   @override
   String get settingsStartupScreenLastRead => '上次阅读';
@@ -4321,6 +4360,51 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   String get navYou => '我的';
 
   @override
+  String get navRecent => '最近';
+
+  @override
+  String get navStats => '统计';
+
+  @override
+  String get navFreeBooks => '免费书籍';
+
+  @override
+  String get recentlyReadTitle => '最近阅读';
+
+  @override
+  String get recentlyReadEmpty => '你打开过的书会显示在这里。';
+
+  @override
+  String recentlyReadDaysAgo({required int count}) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count 天前',
+      one: '昨天',
+      zero: '今天',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get settingsNavBarTitle => '导航栏';
+
+  @override
+  String get navBarEditorHint => '拖动可调整顺序。最多 5 个标签页。书库始终显示。';
+
+  @override
+  String get navBarLibraryNote => '始终显示';
+
+  @override
+  String get navBarDictionaryNote => '没有此标签页时，阅读中查词仍然可用。';
+
+  @override
+  String get navBarVocabularyNote => '已保存的单词会保留，但单词列表和 CSV 导出只在此标签页中。';
+
+  @override
+  String get navBarYouNote => '同时隐藏“我的”和“设置”时，设置会出现在书库的顶部栏中。';
+
+  @override
   String get commonHelp => '帮助';
 
   @override
@@ -5130,12 +5214,6 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
 
   @override
   String get settingsStartupScreenTitle => '启动界面';
-
-  @override
-  String get settingsStartupScreenLibrary => '书库';
-
-  @override
-  String get settingsStartupScreenDictionary => '词典';
 
   @override
   String get settingsStartupScreenLastRead => '上次阅读';

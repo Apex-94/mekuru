@@ -16,17 +16,23 @@ import 'features/backup/presentation/providers/backup_providers.dart';
 import 'features/backup/presentation/providers/full_backup_job_provider.dart';
 import 'features/backup/presentation/screens/full_backup_job_screen.dart';
 import 'features/dictionary/presentation/screens/dictionary_search_screen.dart';
+import 'features/free_books/presentation/screens/free_books_screen.dart';
 import 'features/library/data/repositories/book_repository.dart';
 import 'features/library/presentation/providers/library_providers.dart';
 import 'features/library/presentation/screens/library_screen.dart';
+import 'features/library/presentation/screens/recently_read_screen.dart';
 import 'features/manga/data/services/ocr_billing_client.dart';
 import 'features/manga/data/services/ocr_store_service.dart';
 import 'features/manga/presentation/providers/pro_access_provider.dart';
 import 'features/reader/data/services/gemma_translation.dart';
 import 'features/reader/presentation/providers/gemma_download_provider.dart';
 import 'features/reader/presentation/providers/reader_providers.dart';
+import 'features/settings/data/models/home_tab_layout.dart';
 import 'features/settings/data/services/app_settings_storage.dart';
 import 'features/settings/presentation/providers/app_settings_providers.dart';
+import 'features/settings/presentation/screens/settings_screen.dart';
+import 'features/settings/presentation/widgets/home_tab_ui.dart';
+import 'features/stats/presentation/screens/stats_screen.dart';
 import 'features/sync/presentation/providers/sync_providers.dart';
 import 'features/vocabulary/presentation/screens/vocabulary_screen.dart';
 import 'features/wanikani/presentation/providers/wanikani_providers.dart';
@@ -107,6 +113,7 @@ class _MekuruAppState extends ConsumerState<MekuruApp>
       ref.read(ankidroidConfigProvider.notifier).loadPersistedSettings(),
     );
     unawaited(ref.read(startupScreenProvider.notifier).loadPersistedSettings());
+    unawaited(ref.read(homeTabsProvider.notifier).loadPersistedSettings());
     unawaited(
       ref
           .read(sentenceTranslationModeProvider.notifier)
@@ -168,6 +175,9 @@ class _MekuruAppState extends ConsumerState<MekuruApp>
         emitInstallGauges(
           ref.read(databaseProvider),
           isPro: PreloadedProEntitlement.isInitiallyUnlocked,
+          tabs: [
+            for (final tab in ref.read(homeTabsProvider).visible) tab.name,
+          ],
         ),
       );
       unawaited(reportMemoryAtLaunch());
@@ -321,12 +331,23 @@ class _MainShell extends ConsumerStatefulWidget {
 }
 
 class _MainShellState extends ConsumerState<_MainShell> {
-  static const _tabNames = ['library', 'dictionary', 'vocabulary', 'stats'];
+  /// Tabs dropped when the user leaves them, as their screens are when
+  /// pushed. The You hub (for its this-week subtitle) and Stats watch the
+  /// unwindowed session stream and re-aggregate on every write, and the
+  /// IndexedStack would keep a hidden child doing that forever; evicting
+  /// one closes the subscription, and the fresh mount on return counts
+  /// "this week" from today rather than from the last write. Free books
+  /// holds the Aozora catalog (about 8 MB), freed only when it closes.
+  static const _evictedOnLeave = {
+    HomeTab.you,
+    HomeTab.stats,
+    HomeTab.freeBooks,
+  };
 
-  int _currentIndex = 0;
+  HomeTab _currentTab = HomeTab.library;
   bool _hasAppliedStartup = false;
   final _dictionaryKey = GlobalKey<DictionarySearchScreenState>();
-  final Map<int, Widget> _loadedScreens = <int, Widget>{};
+  final Map<HomeTab, Widget> _loadedScreens = <HomeTab, Widget>{};
 
   @override
   void initState() {
@@ -337,46 +358,32 @@ class _MainShellState extends ConsumerState<_MainShell> {
     _hasAppliedStartup = Navigator.of(context).canPop();
   }
 
-  Widget _buildScreen(int index) {
-    return switch (index) {
-      0 => const LibraryScreen(),
-      1 => DictionarySearchScreen(key: _dictionaryKey),
-      2 => const VocabularyScreen(),
-      3 => const YouScreen(),
-      _ => throw ArgumentError.value(index, 'index', 'Unknown main screen'),
+  Widget _buildScreen(HomeTab tab) {
+    return switch (tab) {
+      HomeTab.library => const LibraryScreen(),
+      HomeTab.dictionary => DictionarySearchScreen(key: _dictionaryKey),
+      HomeTab.vocabulary => const VocabularyScreen(),
+      HomeTab.you => const YouScreen(),
+      HomeTab.recent => const RecentlyReadScreen(),
+      HomeTab.stats => const StatsScreen(),
+      HomeTab.freeBooks => const FreeBooksScreen(),
+      HomeTab.settings => const SettingsScreen(),
     };
   }
 
-  void _ensureScreenLoaded(int index) {
-    _loadedScreens.putIfAbsent(index, () => _buildScreen(index));
-  }
-
-  List<Widget> _indexedScreens() {
-    return List<Widget>.generate(
-      _tabNames.length,
-      (index) => _loadedScreens[index] ?? const SizedBox.shrink(),
-      growable: false,
-    );
-  }
-
-  void _setCurrentIndex(int index) {
-    if (_currentIndex == 1 && index != 1) {
+  void _selectTab(HomeTab tab) {
+    if (_currentTab == HomeTab.dictionary && tab != HomeTab.dictionary) {
       _dictionaryKey.currentState?.commitHistoryIfNeeded();
     }
-    if (_currentIndex == 3 && index != 3) {
-      // The You hub watches the unwindowed session stream for its this-week
-      // subtitle and re-aggregates on every write, and the IndexedStack would
-      // keep a hidden child doing that forever. Evicting it closes the
-      // subscription, and the fresh mount on return counts "this week" from
-      // today rather than from the last write.
-      _loadedScreens.remove(3);
+    if (_currentTab != tab && _evictedOnLeave.contains(_currentTab)) {
+      _loadedScreens.remove(_currentTab);
     }
     _hasAppliedStartup = true;
-    setState(() => _currentIndex = index);
+    setState(() => _currentTab = tab);
     // The tabs are an IndexedStack, not routes, so the navigator observers
     // never see them; this is the only screen-usage signal for the tabs.
-    logUsage('screen.tab_selected', attrs: {'tab': _tabNames[index]});
-    if (index == 1) {
+    logUsage('screen.tab_selected', attrs: {'tab': tab.name});
+    if (tab == HomeTab.dictionary) {
       _focusDictionarySearchIfNeeded();
     }
   }
@@ -391,96 +398,78 @@ class _MainShellState extends ConsumerState<_MainShell> {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
+    final tabs = ref.watch(homeTabsProvider).visible;
 
     // Apply startup screen once after the provider has finished loading
     // the persisted value from SharedPreferences.
-    final startupScreen = ref.watch(startupScreenProvider);
+    final startupScreen = ref.watch(effectiveStartupScreenProvider);
     final notifier = ref.read(startupScreenProvider.notifier);
     if (!_hasAppliedStartup && notifier.hasLoaded) {
       _hasAppliedStartup = true;
-      switch (startupScreen) {
-        case StartupScreen.library:
-          _currentIndex = 0;
-        case StartupScreen.dictionary:
-          _currentIndex = 1;
-          _focusDictionarySearchIfNeeded();
-        case StartupScreen.lastRead:
-          _currentIndex = 0;
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            _openLastReadBook();
-          });
+      _currentTab = startupScreen.tab;
+      if (_currentTab == HomeTab.dictionary) {
+        _focusDictionarySearchIfNeeded();
+      }
+      if (startupScreen == StartupScreen.lastRead) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          _openLastReadBook();
+        });
       }
     }
 
+    // Hiding the current tab in settings leaves Library showing.
+    if (!tabs.contains(_currentTab)) _currentTab = HomeTab.library;
     // Low RAM mode keeps only the current tab built; a tab comes back fresh.
-    if (ref.watch(lowRamModeProvider)) {
-      _loadedScreens.removeWhere((index, _) => index != _currentIndex);
-    }
-    _ensureScreenLoaded(_currentIndex);
+    final lowRamMode = ref.watch(lowRamModeProvider);
+    _loadedScreens.removeWhere(
+      (tab, _) => !tabs.contains(tab) || (lowRamMode && tab != _currentTab),
+    );
+    _loadedScreens.putIfAbsent(_currentTab, () => _buildScreen(_currentTab));
 
+    final selectedIndex = tabs.indexOf(_currentTab);
+    // Library alone needs no bar.
+    final showBar = tabs.length > 1;
     return Scaffold(
-      body: IndexedStack(index: _currentIndex, children: _indexedScreens()),
+      body: IndexedStack(
+        index: selectedIndex,
+        children: [
+          // Keyed, so a reordered bar moves each tab's state with it.
+          for (final tab in tabs)
+            KeyedSubtree(
+              key: ValueKey(tab),
+              child: _loadedScreens[tab] ?? const SizedBox.shrink(),
+            ),
+        ],
+      ),
       // The glass bar floats over the tabs, which scroll under it.
-      extendBody: usesGlassTabBar,
-      bottomNavigationBar: usesGlassTabBar
-          ? _buildGlassTabBar(l10n)
+      extendBody: showBar && usesGlassTabBar,
+      bottomNavigationBar: !showBar
+          ? null
+          : usesGlassTabBar
+          ? GlassTabBar.bottom(
+              selectedIndex: selectedIndex,
+              onTabSelected: (index) => _selectTab(tabs[index]),
+              tabs: [
+                for (final tab in tabs)
+                  GlassTab(
+                    icon: Icon(tab.icon),
+                    activeIcon: Icon(tab.selectedIcon),
+                    label: tab.label(l10n),
+                  ),
+              ],
+            )
           : NavigationBar(
-              selectedIndex: _currentIndex,
-              onDestinationSelected: (index) {
-                _setCurrentIndex(index);
-              },
+              selectedIndex: selectedIndex,
+              onDestinationSelected: (index) => _selectTab(tabs[index]),
               destinations: [
-                NavigationDestination(
-                  icon: const Icon(Icons.auto_stories_outlined),
-                  selectedIcon: const Icon(Icons.auto_stories),
-                  label: l10n.navLibrary,
-                ),
-                NavigationDestination(
-                  icon: const Icon(Icons.book_outlined),
-                  selectedIcon: const Icon(Icons.book),
-                  label: l10n.navDictionary,
-                ),
-                NavigationDestination(
-                  icon: const Icon(Icons.bookmark_border),
-                  selectedIcon: const Icon(Icons.bookmark),
-                  label: l10n.navVocabulary,
-                ),
-                NavigationDestination(
-                  icon: const Icon(Icons.person_outline),
-                  selectedIcon: const Icon(Icons.person),
-                  label: l10n.navYou,
-                ),
+                for (final tab in tabs)
+                  NavigationDestination(
+                    icon: Icon(tab.icon),
+                    selectedIcon: Icon(tab.selectedIcon),
+                    label: tab.label(l10n),
+                  ),
               ],
             ),
-    );
-  }
-
-  Widget _buildGlassTabBar(AppLocalizations l10n) {
-    return GlassTabBar.bottom(
-      selectedIndex: _currentIndex,
-      onTabSelected: _setCurrentIndex,
-      tabs: [
-        GlassTab(
-          icon: const Icon(Icons.auto_stories_outlined),
-          activeIcon: const Icon(Icons.auto_stories),
-          label: l10n.navLibrary,
-        ),
-        GlassTab(
-          icon: const Icon(Icons.book_outlined),
-          activeIcon: const Icon(Icons.book),
-          label: l10n.navDictionary,
-        ),
-        GlassTab(
-          icon: const Icon(Icons.bookmark_border),
-          activeIcon: const Icon(Icons.bookmark),
-          label: l10n.navVocabulary,
-        ),
-        GlassTab(
-          icon: const Icon(Icons.person_outline),
-          activeIcon: const Icon(Icons.person),
-          label: l10n.navYou,
-        ),
-      ],
     );
   }
 

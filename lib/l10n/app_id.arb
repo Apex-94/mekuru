@@ -966,14 +966,6 @@
   "@settingsStartupScreenTitle": {
     "description": "Title for the startup screen setting."
   },
-  "settingsStartupScreenLibrary": "Perpustakaan",
-  "@settingsStartupScreenLibrary": {
-    "description": "Label for the library startup screen option."
-  },
-  "settingsStartupScreenDictionary": "Kamus",
-  "@settingsStartupScreenDictionary": {
-    "description": "Label for the dictionary startup screen option."
-  },
   "settingsStartupScreenLastRead": "Buku Terakhir Dibaca",
   "@settingsStartupScreenLastRead": {
     "description": "Label for the last-read-book startup screen option."
@@ -3237,5 +3229,17 @@
   "mangaDetectSpreadsTitle": "Deteksi halaman ganda",
   "mangaDetectSpreadsSubtitle": "Tampilkan halaman lebar sendiri di tampilan Dua Halaman",
   "mangaShiftSpreadsTitle": "Geser pasangan satu halaman",
-  "mangaShiftSpreadsSubtitle": "Untuk buku yang pasangan halamannya salah"
+  "mangaShiftSpreadsSubtitle": "Untuk buku yang pasangan halamannya salah",
+  "navRecent": "Terbaru",
+  "navStats": "Statistik",
+  "navFreeBooks": "Buku gratis",
+  "recentlyReadTitle": "Baru dibaca",
+  "recentlyReadEmpty": "Buku yang Anda buka akan muncul di sini.",
+  "recentlyReadDaysAgo": "{count, plural, =0{Hari ini} =1{Kemarin} other{{count} hari lalu}}",
+  "settingsNavBarTitle": "Bilah navigasi",
+  "navBarEditorHint": "Seret untuk mengubah urutan. Maksimal 5 tab. Pustaka selalu ditampilkan.",
+  "navBarLibraryNote": "Selalu ditampilkan",
+  "navBarDictionaryNote": "Penelusuran saat membaca tetap berfungsi tanpa tab ini.",
+  "navBarVocabularyNote": "Kata tersimpan tetap ada, tetapi daftar dan ekspor CSV hanya ada di tab ini.",
+  "navBarYouNote": "Jika Anda dan Pengaturan sama-sama disembunyikan, Pengaturan ada di bilah atas Pustaka."
 }

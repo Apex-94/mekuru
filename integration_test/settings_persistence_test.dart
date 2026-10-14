@@ -175,7 +175,7 @@ void main() {
     await tester.tap(
       find.descendant(
         of: find.byType(BottomSheet),
-        matching: find.text(l10n.settingsStartupScreenDictionary),
+        matching: find.text(l10n.navDictionary),
       ),
     );
     await tester.pumpAndSettle();
@@ -189,7 +189,7 @@ void main() {
     expect(
       find.descendant(
         of: find.widgetWithText(ListTile, l10n.settingsStartupScreenTitle),
-        matching: find.text(l10n.settingsStartupScreenDictionary),
+        matching: find.text(l10n.navDictionary),
       ),
       findsOneWidget,
     );

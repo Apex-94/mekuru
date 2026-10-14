@@ -85,6 +85,12 @@ class InMemoryAppSettingsStorage implements AppSettingsStorage {
   Future<void> saveStartupScreen(String screen) async =>
       _startupScreen = screen;
 
+  String? _homeTabs;
+  @override
+  Future<String?> loadHomeTabs() async => _homeTabs;
+  @override
+  Future<void> saveHomeTabs(String layoutJson) async => _homeTabs = layoutJson;
+
   String? _sentenceTranslationMode;
   @override
   Future<String?> loadSentenceTranslationMode() async =>

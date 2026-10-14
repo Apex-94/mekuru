@@ -16,6 +16,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'shared/test_infrastructure.dart';
 
+/// A bottom-bar layout, stored as JSON text.
+const _homeTabs = '{"order":["recent","library"],"hidden":[]}';
+
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
@@ -26,6 +29,7 @@ void main() {
         'app.theme_mode': 'dark',
         'app.color_theme': 'mekuruBlue',
         'app.startup_screen': 'library',
+        'app.home_tabs': _homeTabs,
         'app.library_sort_order': 'dateAdded',
         'reader.font_size': 22.0,
         'reader.keep_screen_on': true,
@@ -147,6 +151,7 @@ void main() {
       SharedPreferences.setMockInitialValues({});
       PreloadedAppSettings.initialThemeMode = ThemeMode.light;
       PreloadedAppSettings.initialColorThemeName = null;
+      PreloadedAppSettings.initialHomeTabs = null;
 
       final targetDb = createTestDatabase();
       addTearDown(targetDb.close);
@@ -181,6 +186,9 @@ void main() {
       expect(prefs.getString('app.theme_mode'), 'dark');
       expect(prefs.getString('app.color_theme'), 'mekuruBlue');
       expect(prefs.getString('app.startup_screen'), 'library');
+      expect(prefs.getString('app.home_tabs'), _homeTabs);
+      // The bar's first frame after the restore already uses it.
+      expect(PreloadedAppSettings.initialHomeTabs, _homeTabs);
       expect(prefs.getString('app.library_sort_order'), 'dateAdded');
       expect(prefs.getDouble('reader.font_size'), 22.0);
       expect(prefs.getBool('reader.keep_screen_on'), true);

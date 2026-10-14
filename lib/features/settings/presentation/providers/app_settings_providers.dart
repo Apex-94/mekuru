@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mekuru/core/services/usage_telemetry.dart';
+import 'package:mekuru/features/settings/data/models/home_tab_layout.dart';
 import 'package:mekuru/features/settings/data/services/ocr_server_config.dart'
     as ocr_server_config;
 import 'package:mekuru/features/settings/data/services/app_settings_storage.dart';
@@ -211,8 +212,26 @@ final filterRomanLettersProvider =
       FilterRomanLettersNotifier.new,
     );
 
-/// Which screen the app opens to on cold start.
-enum StartupScreen { library, dictionary, lastRead }
+/// Which screen the app opens to on cold start. Stored by name, so never
+/// rename one.
+enum StartupScreen {
+  library,
+  dictionary,
+  lastRead,
+  vocabulary,
+  you,
+  recent,
+  stats,
+  freeBooks,
+  settings;
+
+  /// The tab selected at launch: the one of the same name, or Library under
+  /// the last-read book.
+  HomeTab get tab =>
+      this == lastRead ? HomeTab.library : HomeTab.values.byName(name);
+
+  static StartupScreen forTab(HomeTab tab) => values.byName(tab.name);
+}
 
 /// Manages the startup screen preference.
 class StartupScreenNotifier extends Notifier<StartupScreen> {
@@ -256,6 +275,52 @@ final startupScreenProvider =
     NotifierProvider<StartupScreenNotifier, StartupScreen>(
       StartupScreenNotifier.new,
     );
+
+/// The bottom bar's tabs: their order, and which are hidden.
+class HomeTabsNotifier extends Notifier<HomeTabLayout> {
+  bool _hasLoadedPersistedSettings = false;
+
+  @override
+  HomeTabLayout build() =>
+      HomeTabLayout.decode(PreloadedAppSettings.initialHomeTabs);
+
+  /// Load the persisted layout from storage (called once).
+  Future<void> loadPersistedSettings() async {
+    if (_hasLoadedPersistedSettings) return;
+    _hasLoadedPersistedSettings = true;
+
+    state = HomeTabLayout.decode(
+      await ref.read(appSettingsStorageProvider).loadHomeTabs(),
+    );
+  }
+
+  /// Set and persist the layout. A startup screen whose tab this hides goes
+  /// back to Library.
+  void setLayout(HomeTabLayout layout) {
+    state = layout;
+    unawaited(
+      ref.read(appSettingsStorageProvider).saveHomeTabs(layout.encode()),
+    );
+    if (!layout.visible.contains(ref.read(startupScreenProvider).tab)) {
+      ref
+          .read(startupScreenProvider.notifier)
+          .setStartupScreen(StartupScreen.library);
+    }
+  }
+}
+
+final homeTabsProvider = NotifierProvider<HomeTabsNotifier, HomeTabLayout>(
+  HomeTabsNotifier.new,
+);
+
+/// The startup screen the app opens: Library while the chosen one's tab is
+/// hidden (a restore can leave it so).
+final effectiveStartupScreenProvider = Provider<StartupScreen>((ref) {
+  final screen = ref.watch(startupScreenProvider);
+  return ref.watch(homeTabsProvider).visible.contains(screen.tab)
+      ? screen
+      : StartupScreen.library;
+});
 
 /// What the lookup sheet's Sentence tab does.
 enum SentenceTranslationMode { shown, hidden, off }

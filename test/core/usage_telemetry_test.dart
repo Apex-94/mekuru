@@ -271,7 +271,10 @@ void main() {
             SavedWordsCompanion.insert(expression: '言葉', glossaries: '[]'),
           );
 
-      await expectLater(emitInstallGauges(db, isPro: false), completes);
+      await expectLater(
+        emitInstallGauges(db, isPro: false, tabs: const ['library', 'you']),
+        completes,
+      );
     });
   });
 

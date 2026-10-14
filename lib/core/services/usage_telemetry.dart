@@ -171,7 +171,11 @@ void durationUsage(
 /// Emits once-per-launch "state of the install" gauges so aggregate dashboards
 /// can answer what a typical install looks like (library size, dictionaries
 /// enabled, vocabulary size, Pro share) without any per-user tracking.
-Future<void> emitInstallGauges(AppDatabase db, {required bool isPro}) async {
+Future<void> emitInstallGauges(
+  AppDatabase db, {
+  required bool isPro,
+  required List<String> tabs,
+}) async {
   try {
     final books = await countRows(db, db.books);
     final enabledDicts = await countRows(
@@ -181,9 +185,13 @@ Future<void> emitInstallGauges(AppDatabase db, {required bool isPro}) async {
     );
     final savedWords = await countRows(db, db.savedWords);
     final collections = await countRows(db, db.collections);
+    // The bottom bar's visible tabs, in order: at most five short names,
+    // well inside GA's 100-character parameter limit.
+    final tabList = tabs.join(',');
 
     setUsageTag('pro', isPro.toString());
     setUsageTag('library_size', librarySizeBucket(books));
+    setUsageTag('tabs', tabList);
 
     Sentry.metrics.gauge('install.library_books', books);
     Sentry.metrics.gauge('install.dicts_enabled', enabledDicts);
@@ -196,6 +204,7 @@ Future<void> emitInstallGauges(AppDatabase db, {required bool isPro}) async {
       'saved_words': savedWords,
       'collections': collections,
       'is_pro': isPro ? 1 : 0,
+      'tabs': tabList,
     });
   } catch (error) {
     _swallow(error);

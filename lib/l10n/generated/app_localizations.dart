@@ -133,6 +133,78 @@ abstract class AppLocalizations {
   /// **'You'**
   String get navYou;
 
+  /// Bottom navigation label for the optional Recently read tab. Keep it short.
+  ///
+  /// In en, this message translates to:
+  /// **'Recent'**
+  String get navRecent;
+
+  /// Bottom navigation label for the optional Reading stats tab. Keep it short.
+  ///
+  /// In en, this message translates to:
+  /// **'Stats'**
+  String get navStats;
+
+  /// Bottom navigation label for the optional Free books tab. Keep it short.
+  ///
+  /// In en, this message translates to:
+  /// **'Free books'**
+  String get navFreeBooks;
+
+  /// Title of the Recently read tab: every book the user has opened, most recent first.
+  ///
+  /// In en, this message translates to:
+  /// **'Recently read'**
+  String get recentlyReadTitle;
+
+  /// Shown on the Recently read tab before any book has been opened.
+  ///
+  /// In en, this message translates to:
+  /// **'Books you open will appear here.'**
+  String get recentlyReadEmpty;
+
+  /// When a book on the Recently read tab was last opened, in whole days.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{Today} =1{Yesterday} other{{count} days ago}}'**
+  String recentlyReadDaysAgo({required int count});
+
+  /// Settings row that opens the screen for choosing and ordering the bottom navigation tabs.
+  ///
+  /// In en, this message translates to:
+  /// **'Navigation bar'**
+  String get settingsNavBarTitle;
+
+  /// Hint at the top of the navigation bar settings screen.
+  ///
+  /// In en, this message translates to:
+  /// **'Drag to reorder. Up to 5 tabs. Library is always shown.'**
+  String get navBarEditorHint;
+
+  /// Note under the Library tab in the navigation bar settings: it cannot be hidden.
+  ///
+  /// In en, this message translates to:
+  /// **'Always shown'**
+  String get navBarLibraryNote;
+
+  /// Note under the Dictionary tab's switch in the navigation bar settings.
+  ///
+  /// In en, this message translates to:
+  /// **'Lookups while reading still work without this tab.'**
+  String get navBarDictionaryNote;
+
+  /// Note under the Vocabulary tab's switch in the navigation bar settings.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved words are kept, but the list and CSV export are only in this tab.'**
+  String get navBarVocabularyNote;
+
+  /// Note under the You tab's switch in the navigation bar settings: hiding both the You and Settings tabs puts a Settings button in the library's app bar.
+  ///
+  /// In en, this message translates to:
+  /// **'With You and Settings both hidden, Settings is in Library\'s top bar.'**
+  String get navBarYouNote;
+
   /// Tooltip or button label for help.
   ///
   /// In en, this message translates to:
@@ -1542,18 +1614,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Startup Screen'**
   String get settingsStartupScreenTitle;
-
-  /// Label for the library startup screen option.
-  ///
-  /// In en, this message translates to:
-  /// **'Library'**
-  String get settingsStartupScreenLibrary;
-
-  /// Label for the dictionary startup screen option.
-  ///
-  /// In en, this message translates to:
-  /// **'Dictionary'**
-  String get settingsStartupScreenDictionary;
 
   /// Label for the last-read-book startup screen option.
   ///

@@ -24,6 +24,55 @@ class AppLocalizationsEn extends AppLocalizations {
   String get navYou => 'You';
 
   @override
+  String get navRecent => 'Recent';
+
+  @override
+  String get navStats => 'Stats';
+
+  @override
+  String get navFreeBooks => 'Free books';
+
+  @override
+  String get recentlyReadTitle => 'Recently read';
+
+  @override
+  String get recentlyReadEmpty => 'Books you open will appear here.';
+
+  @override
+  String recentlyReadDaysAgo({required int count}) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count days ago',
+      one: 'Yesterday',
+      zero: 'Today',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get settingsNavBarTitle => 'Navigation bar';
+
+  @override
+  String get navBarEditorHint =>
+      'Drag to reorder. Up to 5 tabs. Library is always shown.';
+
+  @override
+  String get navBarLibraryNote => 'Always shown';
+
+  @override
+  String get navBarDictionaryNote =>
+      'Lookups while reading still work without this tab.';
+
+  @override
+  String get navBarVocabularyNote =>
+      'Saved words are kept, but the list and CSV export are only in this tab.';
+
+  @override
+  String get navBarYouNote =>
+      'With You and Settings both hidden, Settings is in Library\'s top bar.';
+
+  @override
   String get commonHelp => 'Help';
 
   @override
@@ -866,12 +915,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settingsStartupScreenTitle => 'Startup Screen';
-
-  @override
-  String get settingsStartupScreenLibrary => 'Library';
-
-  @override
-  String get settingsStartupScreenDictionary => 'Dictionary';
 
   @override
   String get settingsStartupScreenLastRead => 'Last Read Book';

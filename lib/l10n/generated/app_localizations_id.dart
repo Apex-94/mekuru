@@ -24,6 +24,55 @@ class AppLocalizationsId extends AppLocalizations {
   String get navYou => 'Anda';
 
   @override
+  String get navRecent => 'Terbaru';
+
+  @override
+  String get navStats => 'Statistik';
+
+  @override
+  String get navFreeBooks => 'Buku gratis';
+
+  @override
+  String get recentlyReadTitle => 'Baru dibaca';
+
+  @override
+  String get recentlyReadEmpty => 'Buku yang Anda buka akan muncul di sini.';
+
+  @override
+  String recentlyReadDaysAgo({required int count}) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count hari lalu',
+      one: 'Kemarin',
+      zero: 'Hari ini',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get settingsNavBarTitle => 'Bilah navigasi';
+
+  @override
+  String get navBarEditorHint =>
+      'Seret untuk mengubah urutan. Maksimal 5 tab. Pustaka selalu ditampilkan.';
+
+  @override
+  String get navBarLibraryNote => 'Selalu ditampilkan';
+
+  @override
+  String get navBarDictionaryNote =>
+      'Penelusuran saat membaca tetap berfungsi tanpa tab ini.';
+
+  @override
+  String get navBarVocabularyNote =>
+      'Kata tersimpan tetap ada, tetapi daftar dan ekspor CSV hanya ada di tab ini.';
+
+  @override
+  String get navBarYouNote =>
+      'Jika Anda dan Pengaturan sama-sama disembunyikan, Pengaturan ada di bilah atas Pustaka.';
+
+  @override
   String get commonHelp => 'Bantuan';
 
   @override
@@ -872,12 +921,6 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String get settingsStartupScreenTitle => 'Layar Awal';
-
-  @override
-  String get settingsStartupScreenLibrary => 'Perpustakaan';
-
-  @override
-  String get settingsStartupScreenDictionary => 'Kamus';
 
   @override
   String get settingsStartupScreenLastRead => 'Buku Terakhir Dibaca';

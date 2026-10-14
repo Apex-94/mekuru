@@ -151,6 +151,8 @@ abstract class AppSettingsStorage {
   Future<void> saveAnkidroidConfig(String configJson);
   Future<String?> loadStartupScreen();
   Future<void> saveStartupScreen(String screen);
+  Future<String?> loadHomeTabs();
+  Future<void> saveHomeTabs(String layoutJson);
   Future<String?> loadSentenceTranslationMode();
   Future<void> saveSentenceTranslationMode(String mode);
   Future<String?> loadTranslationModel();
@@ -175,14 +177,15 @@ abstract class AppSettingsStorage {
   Future<void> saveEnhancedFuriganaDictEnabled(bool enabled);
 }
 
-/// Holds theme values and Low RAM mode pre-loaded in [main] so Riverpod
-/// notifiers can use them as initial state on the very first frame (no
-/// async gap).
+/// Holds theme values, Low RAM mode and the bottom-bar layout pre-loaded in
+/// [main] so Riverpod notifiers can use them as initial state on the very
+/// first frame (no async gap).
 class PreloadedAppSettings {
   static AppLanguage initialAppLanguage = AppLanguage.system;
   static ThemeMode initialThemeMode = ThemeMode.dark;
   static String? initialColorThemeName;
   static bool initialLowRamMode = false;
+  static String? initialHomeTabs;
 
   static void setAppLanguageFromValue(String? language) {
     initialAppLanguage = AppLanguage.fromStorageValue(language);
@@ -210,6 +213,9 @@ class PreloadedAppSettings {
     initialLowRamMode =
         prefs.getBool(SharedPreferencesAppSettingsStorage.lowRamModeKey) ??
         false;
+    initialHomeTabs = prefs.getString(
+      SharedPreferencesAppSettingsStorage.homeTabsKey,
+    );
   }
 }
 
@@ -223,6 +229,9 @@ class SharedPreferencesAppSettingsStorage implements AppSettingsStorage {
   static const _filterRomanLettersKey = 'app.filter_roman_letters';
   static const _ankidroidConfigKey = 'app.ankidroid_config';
   static const _startupScreenKey = 'app.startup_screen';
+
+  /// JSON text, not a string list: a light restore drops list values.
+  static const homeTabsKey = 'app.home_tabs';
   static const _sentenceTranslationModeKey = 'app.sentence_translation_mode';
   static const _translationModelKey = 'app.translation_model';
   static const _autoFocusSearchKey = 'app.auto_focus_search';
@@ -252,6 +261,7 @@ class SharedPreferencesAppSettingsStorage implements AppSettingsStorage {
     _filterRomanLettersKey,
     _ankidroidConfigKey,
     _startupScreenKey,
+    homeTabsKey,
     _sentenceTranslationModeKey,
     _translationModelKey,
     _autoFocusSearchKey,
@@ -371,6 +381,18 @@ class SharedPreferencesAppSettingsStorage implements AppSettingsStorage {
   Future<void> saveStartupScreen(String screen) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(_startupScreenKey, screen);
+  }
+
+  @override
+  Future<String?> loadHomeTabs() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString(homeTabsKey);
+  }
+
+  @override
+  Future<void> saveHomeTabs(String layoutJson) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(homeTabsKey, layoutJson);
   }
 
   @override
