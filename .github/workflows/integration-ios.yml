@@ -131,6 +131,7 @@ jobs:
           integration_test/epub_manga_convert_flow_test.dart
           --
           integration_test/app_smoke_test.dart
+          integration_test/navigation_bar_customization_test.dart
           integration_test/orphan_sweep_flow_test.dart
           integration_test/reader_indesign_vertical_epub_test.dart
           integration_test/reader_scroll_view_vertical_test.dart
