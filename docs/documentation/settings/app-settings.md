@@ -11,12 +11,22 @@ Change how Mekuru looks and works: language, theme, reader defaults, dictionarie
 
 The **You** tab also has **Free books** and **Reading stats**. See [Free Books](../getting-started/free-books.md) and [Reading Stats](../stats/reading-stats.md).
 
+If you hid the **You** tab, tap the **Settings** tab instead. With both of them hidden, tap the gear at the top of the **Library**.
+
 The sections below follow the order of the **Settings** screen.
+
+## Hidden tabs
+
+Shown only when a page has no tab in the navigation bar. Tap a page to open it. See **Navigation bar** below.
 
 ## General
 
 - **App Language**: the language of Mekuru's menus. Choose **System default**, **English**, **Español**, **Bahasa Indonesia** or **简体中文**. Sentence translations in the lookup sheet use this language too. If your phone uses another language, Mekuru uses English.
-- **Startup Screen**: what Mekuru shows when it starts: **Library**, **Dictionary** or **Last Read Book**.
+- **Startup Screen**: what Mekuru shows when it starts: **Last Read Book**, or any tab in the navigation bar.
+- **Navigation bar**: the tabs at the bottom of the screen. Turn a tab on or off with its switch, and drag the handle to change the order. Up to 5 tabs fit. **Library** is always there.
+    - Tabs you can add: **Recent** (every book you have opened, newest first), **Stats**, **Free books** and **Settings**.
+    - A hidden tab's page opens from **Hidden tabs**, at the top of **Settings**. **Reading stats** and **Free books** are listed there only when the **You** tab is hidden too.
+    - With only **Library** left, the bar disappears.
 
 ## Appearance
 

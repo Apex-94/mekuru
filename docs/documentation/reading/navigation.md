@@ -17,6 +17,8 @@ The **Continue reading** card at the top of the library shows the book you read 
 
 To open your last book every time Mekuru starts, go to **You › Settings › Startup Screen** and pick **Last Read Book**.
 
+To see every book you have opened, newest first, add the **Recent** tab in **You › Settings › Navigation bar**. See [App Settings](../settings/app-settings.md#general).
+
 ## Show or hide the controls
 
 The reader opens with the controls hidden, so the page fills the screen. To show them:
