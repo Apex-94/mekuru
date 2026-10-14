@@ -4,6 +4,9 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mekuru/features/settings/data/models/home_tab_layout.dart';
 import 'package:mekuru/features/settings/presentation/providers/app_settings_providers.dart';
 import 'package:mekuru/features/settings/presentation/screens/navigation_bar_settings_screen.dart';
+import 'package:mekuru/features/settings/presentation/screens/settings_screen.dart';
+import 'package:mekuru/features/stats/presentation/providers/stats_providers.dart';
+import 'package:mekuru/features/stats/presentation/screens/stats_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../test_app.dart';
@@ -19,17 +22,23 @@ void main() {
       HomeTab.freeBooks,
       HomeTab.settings,
     },
+    Widget home = const NavigationBarSettingsScreen(),
   }) async {
     SharedPreferences.setMockInitialValues({
       'app.home_tabs': HomeTabLayout(HomeTab.values, hidden).encode(),
     });
-    container = ProviderContainer();
+    container = ProviderContainer(
+      overrides: [
+        sessionsProvider.overrideWith((ref) => Stream.value(const [])),
+        wordEventsProvider.overrideWith((ref) => Stream.value(const [])),
+      ],
+    );
     addTearDown(container.dispose);
     await container.read(homeTabsProvider.notifier).loadPersistedSettings();
     await tester.pumpWidget(
       UncontrolledProviderScope(
         container: container,
-        child: buildLocalizedTestApp(home: const NavigationBarSettingsScreen()),
+        child: buildLocalizedTestApp(home: home),
       ),
     );
     await tester.pumpAndSettle();
@@ -100,19 +109,58 @@ void main() {
     expect(container.read(startupScreenProvider), StartupScreen.library);
   });
 
-  testWidgets('hiding Dictionary and Vocabulary explains what stays', (
-    tester,
-  ) async {
+  testWidgets('the hint says where hidden tabs go', (tester) async {
     await pumpEditor(tester);
     expect(
-      find.text('Lookups while reading still work without this tab.'),
+      find.textContaining('Hidden tabs open from Settings.'),
       findsOneWidget,
     );
-    expect(
-      find.text(
-        'Saved words are kept, but the list and CSV export are only in this tab.',
-      ),
-      findsOneWidget,
-    );
+  });
+
+  group('Settings lists the pages the bar no longer leads to', () {
+    Future<void> pumpSettings(WidgetTester tester, Set<HomeTab> hidden) =>
+        pumpEditor(tester, hidden: hidden, home: const SettingsScreen());
+
+    final section = find.text('Hidden tabs');
+
+    testWidgets('Recent, by default', (tester) async {
+      await pumpSettings(tester, {
+        HomeTab.recent,
+        HomeTab.stats,
+        HomeTab.freeBooks,
+        HomeTab.settings,
+      });
+      expect(section, findsOneWidget);
+      expect(find.text('Recently read'), findsOneWidget);
+      // You still links them.
+      expect(find.text('Reading stats'), findsNothing);
+    });
+
+    testWidgets("You's pages once You is hidden, and they open", (
+      tester,
+    ) async {
+      await pumpSettings(tester, {
+        HomeTab.vocabulary,
+        HomeTab.you,
+        HomeTab.stats,
+        HomeTab.freeBooks,
+        HomeTab.settings,
+      });
+      expect(find.text('Vocabulary'), findsOneWidget);
+      expect(find.text('Free books'), findsOneWidget);
+
+      await tester.tap(find.text('Reading stats'));
+      await tester.pumpAndSettle();
+      expect(find.byType(StatsScreen), findsOneWidget);
+    });
+
+    testWidgets('no section when every page is in the bar', (tester) async {
+      await pumpSettings(tester, {
+        HomeTab.stats,
+        HomeTab.freeBooks,
+        HomeTab.settings,
+      });
+      expect(section, findsNothing);
+    });
   });
 }

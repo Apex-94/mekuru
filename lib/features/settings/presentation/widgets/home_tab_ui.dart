@@ -1,9 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:mekuru/features/dictionary/presentation/screens/dictionary_search_screen.dart';
+import 'package:mekuru/features/free_books/presentation/screens/free_books_screen.dart';
+import 'package:mekuru/features/library/presentation/screens/library_screen.dart';
+import 'package:mekuru/features/library/presentation/screens/recently_read_screen.dart';
 import 'package:mekuru/features/settings/data/models/home_tab_layout.dart';
+import 'package:mekuru/features/settings/presentation/screens/settings_screen.dart';
+import 'package:mekuru/features/stats/presentation/screens/stats_screen.dart';
+import 'package:mekuru/features/vocabulary/presentation/screens/vocabulary_screen.dart';
+import 'package:mekuru/features/you/presentation/screens/you_screen.dart';
 import 'package:mekuru/l10n/generated/app_localizations.dart';
+import 'package:mekuru/shared/utils/app_routes.dart';
 
 /// How a [HomeTab] looks in the bottom bar, its settings and the startup
-/// screen picker.
+/// screen picker, and the page it opens.
 extension HomeTabUi on HomeTab {
   IconData get icon => _icons.$1;
 
@@ -31,4 +40,32 @@ extension HomeTabUi on HomeTab {
     HomeTab.freeBooks => l10n.navFreeBooks,
     HomeTab.settings => l10n.settingsTitle,
   };
+
+  /// The page's own title, where there is room for more than the label.
+  String pageTitle(AppLocalizations l10n) => switch (this) {
+    HomeTab.recent => l10n.recentlyReadTitle,
+    HomeTab.stats => l10n.statsScreenTitle,
+    HomeTab.freeBooks => l10n.freeBooksTitle,
+    _ => label(l10n),
+  };
+
+  /// The tab's page.
+  Widget page({Key? key}) => switch (this) {
+    HomeTab.library => LibraryScreen(key: key),
+    HomeTab.dictionary => DictionarySearchScreen(key: key),
+    HomeTab.vocabulary => VocabularyScreen(key: key),
+    HomeTab.you => YouScreen(key: key),
+    HomeTab.recent => RecentlyReadScreen(key: key),
+    HomeTab.stats => StatsScreen(key: key),
+    HomeTab.freeBooks => FreeBooksScreen(key: key),
+    HomeTab.settings => SettingsScreen(key: key),
+  };
+
+  /// [page] pushed over the bar, named like the app's other routes to it.
+  Route<void> pageRoute() => namedRoute(switch (this) {
+    HomeTab.dictionary => 'dictionary_search',
+    HomeTab.recent => 'recently_read',
+    HomeTab.freeBooks => 'free_books',
+    _ => name,
+  }, (_) => page());
 }

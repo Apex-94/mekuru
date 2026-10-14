@@ -178,7 +178,7 @@ abstract class AppLocalizations {
   /// Hint at the top of the navigation bar settings screen.
   ///
   /// In en, this message translates to:
-  /// **'Drag to reorder. Up to 5 tabs. Library is always shown.'**
+  /// **'Drag to reorder. Up to 5 tabs. Library is always shown. Hidden tabs open from Settings.'**
   String get navBarEditorHint;
 
   /// Note under the Library tab in the navigation bar settings: it cannot be hidden.
@@ -187,23 +187,17 @@ abstract class AppLocalizations {
   /// **'Always shown'**
   String get navBarLibraryNote;
 
-  /// Note under the Dictionary tab's switch in the navigation bar settings.
-  ///
-  /// In en, this message translates to:
-  /// **'Lookups while reading still work without this tab.'**
-  String get navBarDictionaryNote;
-
-  /// Note under the Vocabulary tab's switch in the navigation bar settings.
-  ///
-  /// In en, this message translates to:
-  /// **'Saved words are kept, but the list and CSV export are only in this tab.'**
-  String get navBarVocabularyNote;
-
   /// Note under the You tab's switch in the navigation bar settings: hiding both the You and Settings tabs puts a Settings button in the library's app bar.
   ///
   /// In en, this message translates to:
   /// **'With You and Settings both hidden, Settings is in Library\'s top bar.'**
   String get navBarYouNote;
+
+  /// Settings section header above links to the pages whose bottom-bar tab is hidden (e.g. Vocabulary, Reading stats).
+  ///
+  /// In en, this message translates to:
+  /// **'Hidden tabs'**
+  String get settingsSectionHiddenTabs;
 
   /// Tooltip or button label for help.
   ///

@@ -79,11 +79,9 @@ class NavigationBarSettingsScreen extends ConsumerWidget {
     );
   }
 
-  /// What hiding the tab costs, for the tabs where that isn't obvious.
+  /// The tabs whose switch needs a word of explanation.
   static String? _note(AppLocalizations l10n, HomeTab tab) => switch (tab) {
     HomeTab.library => l10n.navBarLibraryNote,
-    HomeTab.dictionary => l10n.navBarDictionaryNote,
-    HomeTab.vocabulary => l10n.navBarVocabularyNote,
     HomeTab.you => l10n.navBarYouNote,
     _ => null,
   };

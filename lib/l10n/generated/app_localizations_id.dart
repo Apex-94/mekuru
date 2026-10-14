@@ -55,22 +55,17 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String get navBarEditorHint =>
-      'Seret untuk mengubah urutan. Maksimal 5 tab. Pustaka selalu ditampilkan.';
+      'Seret untuk mengubah urutan. Maksimal 5 tab. Pustaka selalu ditampilkan. Tab yang disembunyikan dapat dibuka dari Pengaturan.';
 
   @override
   String get navBarLibraryNote => 'Selalu ditampilkan';
 
   @override
-  String get navBarDictionaryNote =>
-      'Penelusuran saat membaca tetap berfungsi tanpa tab ini.';
-
-  @override
-  String get navBarVocabularyNote =>
-      'Kata tersimpan tetap ada, tetapi daftar dan ekspor CSV hanya ada di tab ini.';
-
-  @override
   String get navBarYouNote =>
       'Jika Anda dan Pengaturan sama-sama disembunyikan, Pengaturan ada di bilah atas Pustaka.';
+
+  @override
+  String get settingsSectionHiddenTabs => 'Tab tersembunyi';
 
   @override
   String get commonHelp => 'Bantuan';

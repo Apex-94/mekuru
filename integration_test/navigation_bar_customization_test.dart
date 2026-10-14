@@ -82,8 +82,15 @@ void main() {
       lessThan(tester.getCenter(editorRow(l10n.navLibrary)).dy),
     );
 
+    // Back in Settings, the hidden Vocabulary opens from Hidden tabs.
     await tester.pageBack();
     await tester.pumpAndSettle();
+    expect(find.text(l10n.settingsSectionHiddenTabs), findsOneWidget);
+    await tester.tap(find.text(l10n.navVocabulary));
+    await pumpUntilVisible(tester, find.text(l10n.vocabularyEmptyTitle));
+    await tester.pageBack();
+    await tester.pumpAndSettle();
+
     await tester.pageBack();
     await tester.pumpAndSettle();
 

@@ -55,22 +55,17 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get navBarEditorHint =>
-      'Drag to reorder. Up to 5 tabs. Library is always shown.';
+      'Drag to reorder. Up to 5 tabs. Library is always shown. Hidden tabs open from Settings.';
 
   @override
   String get navBarLibraryNote => 'Always shown';
 
   @override
-  String get navBarDictionaryNote =>
-      'Lookups while reading still work without this tab.';
-
-  @override
-  String get navBarVocabularyNote =>
-      'Saved words are kept, but the list and CSV export are only in this tab.';
-
-  @override
   String get navBarYouNote =>
       'With You and Settings both hidden, Settings is in Library\'s top bar.';
+
+  @override
+  String get settingsSectionHiddenTabs => 'Hidden tabs';
 
   @override
   String get commonHelp => 'Help';

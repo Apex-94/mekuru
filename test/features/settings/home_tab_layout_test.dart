@@ -111,6 +111,29 @@ void main() {
       );
     });
 
+    test('missing pages: hidden tabs the bar no longer leads to', () {
+      expect(HomeTabLayout.defaults().missingPages, [recent]);
+      expect(
+        HomeTabLayout(HomeTab.values, {
+          dictionary,
+          vocabulary,
+          stats,
+          freeBooks,
+          settings,
+        }).missingPages,
+        [dictionary, vocabulary],
+        reason: 'You still links Stats and Free books',
+      );
+      expect(
+        HomeTabLayout(
+          [freeBooks, ...HomeTab.values],
+          {you, freeBooks, stats, settings},
+        ).missingPages,
+        [freeBooks, stats],
+        reason: "You's pages, in the user's order",
+      );
+    });
+
     test('unreadable JSON gives the defaults', () {
       for (final json in ['', 'not json', '[]', '{"order": "library"}']) {
         expect(

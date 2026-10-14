@@ -55,22 +55,17 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get navBarEditorHint =>
-      'Arrastra para cambiar el orden. Hasta 5 pestañas. Biblioteca siempre se muestra.';
+      'Arrastra para cambiar el orden. Hasta 5 pestañas. Biblioteca siempre se muestra. Las pestañas ocultas se abren desde Configuración.';
 
   @override
   String get navBarLibraryNote => 'Siempre visible';
 
   @override
-  String get navBarDictionaryNote =>
-      'Las consultas mientras lees siguen funcionando sin esta pestaña.';
-
-  @override
-  String get navBarVocabularyNote =>
-      'Tus palabras guardadas se conservan, pero la lista y la exportación CSV solo están en esta pestaña.';
-
-  @override
   String get navBarYouNote =>
       'Si ocultas Tú y Configuración, Configuración aparece en la barra superior de Biblioteca.';
+
+  @override
+  String get settingsSectionHiddenTabs => 'Pestañas ocultas';
 
   @override
   String get commonHelp => 'Ayuda';

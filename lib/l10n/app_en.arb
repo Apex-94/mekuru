@@ -53,7 +53,7 @@
   "@settingsNavBarTitle": {
     "description": "Settings row that opens the screen for choosing and ordering the bottom navigation tabs."
   },
-  "navBarEditorHint": "Drag to reorder. Up to 5 tabs. Library is always shown.",
+  "navBarEditorHint": "Drag to reorder. Up to 5 tabs. Library is always shown. Hidden tabs open from Settings.",
   "@navBarEditorHint": {
     "description": "Hint at the top of the navigation bar settings screen."
   },
@@ -61,17 +61,13 @@
   "@navBarLibraryNote": {
     "description": "Note under the Library tab in the navigation bar settings: it cannot be hidden."
   },
-  "navBarDictionaryNote": "Lookups while reading still work without this tab.",
-  "@navBarDictionaryNote": {
-    "description": "Note under the Dictionary tab's switch in the navigation bar settings."
-  },
-  "navBarVocabularyNote": "Saved words are kept, but the list and CSV export are only in this tab.",
-  "@navBarVocabularyNote": {
-    "description": "Note under the Vocabulary tab's switch in the navigation bar settings."
-  },
   "navBarYouNote": "With You and Settings both hidden, Settings is in Library's top bar.",
   "@navBarYouNote": {
     "description": "Note under the You tab's switch in the navigation bar settings: hiding both the You and Settings tabs puts a Settings button in the library's app bar."
+  },
+  "settingsSectionHiddenTabs": "Hidden tabs",
+  "@settingsSectionHiddenTabs": {
+    "description": "Settings section header above links to the pages whose bottom-bar tab is hidden (e.g. Vocabulary, Reading stats)."
   },
   "commonHelp": "Help",
   "@commonHelp": {

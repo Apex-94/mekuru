@@ -92,6 +92,22 @@ class HomeTabLayout {
   bool get settingsInBar =>
       visible.contains(HomeTab.you) || visible.contains(HomeTab.settings);
 
+  /// Pages the bar no longer leads to, in the user's order: hidden tabs,
+  /// and Stats and Free books only while the You hub that links them is
+  /// hidden too. Settings lists them under Hidden tabs.
+  List<HomeTab> get missingPages => [
+    for (final tab in order)
+      if (hidden.contains(tab) &&
+          switch (tab) {
+            HomeTab.dictionary || HomeTab.vocabulary || HomeTab.recent => true,
+            HomeTab.stats || HomeTab.freeBooks => hidden.contains(HomeTab.you),
+            // Library is never hidden, Settings is where the list is, and
+            // You's own pages are listed one by one.
+            HomeTab.library || HomeTab.settings || HomeTab.you => false,
+          })
+        tab,
+  ];
+
   String encode() => jsonEncode({
     'order': [for (final tab in order) tab.name],
     'hidden': [

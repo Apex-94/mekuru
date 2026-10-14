@@ -3237,9 +3237,8 @@
   "recentlyReadEmpty": "Buku yang Anda buka akan muncul di sini.",
   "recentlyReadDaysAgo": "{count, plural, =0{Hari ini} =1{Kemarin} other{{count} hari lalu}}",
   "settingsNavBarTitle": "Bilah navigasi",
-  "navBarEditorHint": "Seret untuk mengubah urutan. Maksimal 5 tab. Pustaka selalu ditampilkan.",
+  "navBarEditorHint": "Seret untuk mengubah urutan. Maksimal 5 tab. Pustaka selalu ditampilkan. Tab yang disembunyikan dapat dibuka dari Pengaturan.",
   "navBarLibraryNote": "Selalu ditampilkan",
-  "navBarDictionaryNote": "Penelusuran saat membaca tetap berfungsi tanpa tab ini.",
-  "navBarVocabularyNote": "Kata tersimpan tetap ada, tetapi daftar dan ekspor CSV hanya ada di tab ini.",
-  "navBarYouNote": "Jika Anda dan Pengaturan sama-sama disembunyikan, Pengaturan ada di bilah atas Pustaka."
+  "navBarYouNote": "Jika Anda dan Pengaturan sama-sama disembunyikan, Pengaturan ada di bilah atas Pustaka.",
+  "settingsSectionHiddenTabs": "Tab tersembunyi"
 }

@@ -3237,9 +3237,8 @@
   "recentlyReadEmpty": "Los libros que abras aparecerán aquí.",
   "recentlyReadDaysAgo": "{count, plural, =0{Hoy} =1{Ayer} other{Hace {count} días}}",
   "settingsNavBarTitle": "Barra de navegación",
-  "navBarEditorHint": "Arrastra para cambiar el orden. Hasta 5 pestañas. Biblioteca siempre se muestra.",
+  "navBarEditorHint": "Arrastra para cambiar el orden. Hasta 5 pestañas. Biblioteca siempre se muestra. Las pestañas ocultas se abren desde Configuración.",
   "navBarLibraryNote": "Siempre visible",
-  "navBarDictionaryNote": "Las consultas mientras lees siguen funcionando sin esta pestaña.",
-  "navBarVocabularyNote": "Tus palabras guardadas se conservan, pero la lista y la exportación CSV solo están en esta pestaña.",
-  "navBarYouNote": "Si ocultas Tú y Configuración, Configuración aparece en la barra superior de Biblioteca."
+  "navBarYouNote": "Si ocultas Tú y Configuración, Configuración aparece en la barra superior de Biblioteca.",
+  "settingsSectionHiddenTabs": "Pestañas ocultas"
 }

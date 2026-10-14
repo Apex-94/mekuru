@@ -54,19 +54,16 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settingsNavBarTitle => '导航栏';
 
   @override
-  String get navBarEditorHint => '拖动可调整顺序。最多 5 个标签页。书库始终显示。';
+  String get navBarEditorHint => '拖动可调整顺序。最多 5 个标签页。书库始终显示。隐藏的标签页可在设置中打开。';
 
   @override
   String get navBarLibraryNote => '始终显示';
 
   @override
-  String get navBarDictionaryNote => '没有此标签页时，阅读中查词仍然可用。';
-
-  @override
-  String get navBarVocabularyNote => '已保存的单词会保留，但单词列表和 CSV 导出只在此标签页中。';
-
-  @override
   String get navBarYouNote => '同时隐藏“我的”和“设置”时，设置会出现在书库的顶部栏中。';
+
+  @override
+  String get settingsSectionHiddenTabs => '隐藏的标签页';
 
   @override
   String get commonHelp => '帮助';
@@ -4390,19 +4387,16 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   String get settingsNavBarTitle => '导航栏';
 
   @override
-  String get navBarEditorHint => '拖动可调整顺序。最多 5 个标签页。书库始终显示。';
+  String get navBarEditorHint => '拖动可调整顺序。最多 5 个标签页。书库始终显示。隐藏的标签页可在设置中打开。';
 
   @override
   String get navBarLibraryNote => '始终显示';
 
   @override
-  String get navBarDictionaryNote => '没有此标签页时，阅读中查词仍然可用。';
-
-  @override
-  String get navBarVocabularyNote => '已保存的单词会保留，但单词列表和 CSV 导出只在此标签页中。';
-
-  @override
   String get navBarYouNote => '同时隐藏“我的”和“设置”时，设置会出现在书库的顶部栏中。';
+
+  @override
+  String get settingsSectionHiddenTabs => '隐藏的标签页';
 
   @override
   String get commonHelp => '帮助';

@@ -16,11 +16,8 @@ import 'features/backup/presentation/providers/backup_providers.dart';
 import 'features/backup/presentation/providers/full_backup_job_provider.dart';
 import 'features/backup/presentation/screens/full_backup_job_screen.dart';
 import 'features/dictionary/presentation/screens/dictionary_search_screen.dart';
-import 'features/free_books/presentation/screens/free_books_screen.dart';
 import 'features/library/data/repositories/book_repository.dart';
 import 'features/library/presentation/providers/library_providers.dart';
-import 'features/library/presentation/screens/library_screen.dart';
-import 'features/library/presentation/screens/recently_read_screen.dart';
 import 'features/manga/data/services/ocr_billing_client.dart';
 import 'features/manga/data/services/ocr_store_service.dart';
 import 'features/manga/presentation/providers/pro_access_provider.dart';
@@ -30,13 +27,9 @@ import 'features/reader/presentation/providers/reader_providers.dart';
 import 'features/settings/data/models/home_tab_layout.dart';
 import 'features/settings/data/services/app_settings_storage.dart';
 import 'features/settings/presentation/providers/app_settings_providers.dart';
-import 'features/settings/presentation/screens/settings_screen.dart';
 import 'features/settings/presentation/widgets/home_tab_ui.dart';
-import 'features/stats/presentation/screens/stats_screen.dart';
 import 'features/sync/presentation/providers/sync_providers.dart';
-import 'features/vocabulary/presentation/screens/vocabulary_screen.dart';
 import 'features/wanikani/presentation/providers/wanikani_providers.dart';
-import 'features/you/presentation/screens/you_screen.dart';
 import 'l10n/generated/app_localizations.dart';
 import 'l10n/l10n.dart';
 import 'main.dart'
@@ -358,18 +351,8 @@ class _MainShellState extends ConsumerState<_MainShell> {
     _hasAppliedStartup = Navigator.of(context).canPop();
   }
 
-  Widget _buildScreen(HomeTab tab) {
-    return switch (tab) {
-      HomeTab.library => const LibraryScreen(),
-      HomeTab.dictionary => DictionarySearchScreen(key: _dictionaryKey),
-      HomeTab.vocabulary => const VocabularyScreen(),
-      HomeTab.you => const YouScreen(),
-      HomeTab.recent => const RecentlyReadScreen(),
-      HomeTab.stats => const StatsScreen(),
-      HomeTab.freeBooks => const FreeBooksScreen(),
-      HomeTab.settings => const SettingsScreen(),
-    };
-  }
+  Widget _buildScreen(HomeTab tab) =>
+      tab.page(key: tab == HomeTab.dictionary ? _dictionaryKey : null);
 
   void _selectTab(HomeTab tab) {
     if (_currentTab == HomeTab.dictionary && tab != HomeTab.dictionary) {

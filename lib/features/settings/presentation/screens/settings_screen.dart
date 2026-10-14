@@ -67,6 +67,22 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       appBar: AppBar(title: Text(l10n.settingsTitle)),
       body: ListView(
         children: [
+          // ── Hidden tabs: the pages the bar no longer leads to ──
+          if (homeTabs.missingPages.isNotEmpty) ...[
+            SettingsSectionHeader(title: l10n.settingsSectionHiddenTabs),
+            for (final tab in homeTabs.missingPages)
+              ListTile(
+                leading: Icon(tab.icon, color: theme.colorScheme.primary),
+                title: Text(tab.pageTitle(l10n)),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () {
+                  AppHaptics.light();
+                  Navigator.of(context).push(tab.pageRoute());
+                },
+              ),
+            const Divider(),
+          ],
+
           // ── General ──
           SettingsSectionHeader(title: l10n.settingsSectionGeneral),
           ListTile(
