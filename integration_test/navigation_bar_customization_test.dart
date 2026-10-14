@@ -88,6 +88,9 @@ void main() {
     expect(find.text(l10n.settingsSectionHiddenTabs), findsOneWidget);
     await tester.tap(find.text(l10n.navVocabulary));
     await pumpUntilVisible(tester, find.text(l10n.vocabularyEmptyTitle));
+    // iOS's page transition outlasts the first pump: Settings' Back button
+    // is still on screen until it ends.
+    await tester.pumpAndSettle();
     await tester.pageBack();
     await tester.pumpAndSettle();
 
