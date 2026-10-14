@@ -21,6 +21,17 @@ void main() {
     PreloadedAppSettings.initialColorThemeName = null;
   });
 
+  /// Scrolls the settings list until [text] shows: on CI's 320x640 screen
+  /// the Appearance rows are below the fold.
+  Future<void> scrollTo(WidgetTester tester, String text) async {
+    await tester.scrollUntilVisible(
+      find.text(text),
+      200,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.pump();
+  }
+
   testWidgets('theme mode change updates subtitle', (tester) async {
     final db = createTestDatabase();
     addTearDown(db.close);
@@ -29,6 +40,7 @@ void main() {
       buildIntegrationTestApp(db: db, home: const SettingsScreen()),
     );
     await tester.pumpAndSettle();
+    await scrollTo(tester, l10n.settingsThemeTitle);
 
     // Default theme is dark. Verify subtitle shows "Dark".
     expect(find.text(l10n.settingsThemeDark), findsOneWidget);
@@ -54,6 +66,7 @@ void main() {
       buildIntegrationTestApp(db: db, home: const SettingsScreen()),
     );
     await tester.pumpAndSettle();
+    await scrollTo(tester, l10n.settingsColorThemeTitle);
 
     // Verify the color theme tile is visible.
     expect(find.text(l10n.settingsColorThemeTitle), findsOneWidget);
@@ -92,6 +105,7 @@ void main() {
         ),
       );
       await tester.pumpAndSettle();
+      await scrollTo(tester, l10n.settingsThemeTitle);
 
       await tester.tap(find.text(l10n.settingsThemeTitle));
       await tester.pumpAndSettle();
@@ -110,6 +124,7 @@ void main() {
         ),
       );
       await tester.pumpAndSettle();
+      await scrollTo(tester, l10n.settingsThemeTitle);
 
       expect(find.text(l10n.settingsThemeLight), findsOneWidget);
       expect(find.text(l10n.settingsThemeDark), findsNothing);
