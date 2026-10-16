@@ -42,13 +42,40 @@ Do one of these:
 
 1. Press and hold a word in the book to select it.
 2. Drag the selection handles to cover the passage.
-3. Tap the highlighter button at the bottom right (**Highlight selection**).
+3. Tap the highlighter button at the bottom right (**Highlight selection**). More buttons appear above it.
 4. To mark the whole sentence, tap **Select sentence**. This step is optional.
 5. Tap a color: yellow, blue, green or pink.
 
 Without Pro, the highlighter button opens the Pro screen instead.
 
 Your highlights show in the text every time you open the book.
+
+### Add a note
+
+A note is your own text on a highlight, such as a translation or a question to look up later.
+
+To highlight a passage and write a note in one go:
+
+1. Select the passage and tap the highlighter button, as above.
+2. Tap **Add note** (note icon), just above **Select sentence**.
+3. Type your note and tap **Save**.
+
+The passage is highlighted in yellow. If you tap **Cancel**, the highlight stays without a note.
+
+To add a note to a highlight you already have, press and hold it on the page or in the highlights list.
+
+### Open a highlight on the page
+
+Press and hold a highlight in the text. A sheet opens with the highlighted passage and its note.
+
+![Sheet for a highlight, with its note and the Delete and Edit Note buttons](../screenshots/epub-highlight-note-sheet.jpg)
+
+In the sheet you can:
+
+- Tap **Add note** to write a note, or **Edit Note** to change the one it has. Type the note and tap **Save**.
+- Tap **Delete** to remove the highlight.
+
+A quick tap on a highlight looks up the word, as it does anywhere else in the book.
 
 ### See your highlights
 
@@ -66,6 +93,7 @@ To see a book's highlights from the library, press and hold the book and tap **H
 ## If something goes wrong
 
 - **The Highlights button is dimmed.** Highlights need Pro. Tap the button to open the Pro screen.
+- **Holding a highlight selects text instead of opening it.** Keep your finger still until the sheet opens.
 - **"No bookmarks yet."** You have not bookmarked a page in this book. Tap the bookmark icon while reading to add one.
 
 ## Related pages
