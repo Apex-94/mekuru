@@ -3,21 +3,63 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mekuru/core/database/database_provider.dart';
 import 'package:mekuru/core/services/usage_telemetry.dart';
 import 'package:mekuru/features/dictionary/data/repositories/dictionary_repository.dart';
+import 'package:mekuru/features/dictionary/data/services/dictionary_query_service.dart';
 import 'package:mekuru/features/dictionary/presentation/providers/dictionary_providers.dart';
 import 'package:mekuru/l10n/l10n.dart';
 
-/// Opens the form for the user's own definition: a new one for [term], or
-/// [entry] to edit. True once saved.
+/// Opens the form for the user's own definition: a new one for [term] and
+/// [reading], or [entry] to edit. True once saved.
 Future<bool> showUserDefinitionDialog(
   BuildContext context, {
   String term = '',
+  String reading = '',
   DictionaryEntry? entry,
 }) async {
   final saved = await showDialog<bool>(
     context: context,
-    builder: (_) => _UserDefinitionDialog(term: term, entry: entry),
+    builder: (_) =>
+        _UserDefinitionDialog(term: term, reading: reading, entry: entry),
   );
   return saved == true;
+}
+
+/// Opens the form for a new definition of [term]. Its reading comes from the
+/// first of [results] written exactly [term], so the saved definition joins
+/// that word's card instead of making a second one. [onAdded] runs after a
+/// save.
+class AddUserDefinitionButton extends StatelessWidget {
+  const AddUserDefinitionButton({
+    super.key,
+    required this.term,
+    required this.results,
+    required this.onAdded,
+  });
+
+  final String term;
+  final Iterable<DictionaryEntryWithSource> results;
+  final VoidCallback onAdded;
+
+  @override
+  Widget build(BuildContext context) {
+    return TextButton.icon(
+      onPressed: () async {
+        final reading = results
+            .map((r) => r.entry)
+            .where((e) => e.expression == term && e.reading.isNotEmpty)
+            .firstOrNull
+            ?.reading;
+        if (await showUserDefinitionDialog(
+          context,
+          term: term,
+          reading: reading ?? '',
+        )) {
+          onAdded();
+        }
+      },
+      icon: const Icon(Icons.add),
+      label: Text(context.l10n.userDefinitionAdd),
+    );
+  }
 }
 
 /// Asks before deleting the user's own definition [entry]. True once
@@ -57,9 +99,14 @@ Future<bool> confirmDeleteUserDefinition(
 }
 
 class _UserDefinitionDialog extends ConsumerStatefulWidget {
-  const _UserDefinitionDialog({required this.term, this.entry});
+  const _UserDefinitionDialog({
+    required this.term,
+    required this.reading,
+    this.entry,
+  });
 
   final String term;
+  final String reading;
   final DictionaryEntry? entry;
 
   @override
@@ -71,7 +118,9 @@ class _UserDefinitionDialogState extends ConsumerState<_UserDefinitionDialog> {
   late final _term = TextEditingController(
     text: widget.entry?.expression ?? widget.term,
   );
-  late final _reading = TextEditingController(text: widget.entry?.reading);
+  late final _reading = TextEditingController(
+    text: widget.entry?.reading ?? widget.reading,
+  );
   late final _definition = TextEditingController(
     text: switch (widget.entry) {
       final entry? => DictionaryRepository.userDefinitionText(entry),

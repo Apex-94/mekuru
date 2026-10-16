@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:drift/drift.dart' show Value;
 import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -12,6 +13,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mekuru/core/database/database_provider.dart';
 import 'package:mekuru/core/platform/device_memory.dart';
 import 'package:mekuru/features/dictionary/data/models/dictionary_entry.dart';
+import 'package:mekuru/features/dictionary/data/repositories/dictionary_repository.dart';
 import 'package:mekuru/features/dictionary/data/services/dictionary_query_service.dart';
 import 'package:mekuru/features/dictionary/presentation/providers/dictionary_providers.dart';
 import 'package:mekuru/features/reader/presentation/widgets/lookup_sheet.dart';
@@ -223,6 +225,60 @@ void main() {
 
     expect(find.text('Ichidan verb'), findsOneWidget);
     expect(find.text('Transitive verb'), findsOneWidget);
+  });
+
+  testWidgets('offers a definition after the results too, and puts it '
+      'first in the word\'s card', (tester) async {
+    SharedPreferences.setMockInitialValues({});
+    final db = AppDatabase(NativeDatabase.memory());
+    addTearDown(db.close);
+    final jmdictId = await DictionaryRepository(db).insertDictionary('JMdict');
+    await db
+        .into(db.dictionaryEntries)
+        .insert(
+          DictionaryEntriesCompanion.insert(
+            expression: '食べる',
+            reading: const Value('たべる'),
+            definitionTags: const Value('v1'),
+            rules: const Value('vt'),
+            glossaries: '["to eat"]',
+            dictionaryId: jmdictId,
+          ),
+        );
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          databaseProvider.overrideWithValue(db),
+          dictionariesProvider.overrideWith((ref) => Stream.value([_jmdict])),
+        ],
+        child: buildLocalizedTestApp(
+          home: const Scaffold(
+            body: SizedBox.expand(child: LookupSheet(selectedText: '食べる')),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(
+      tester.getTopLeft(find.text('Add my definition')).dy,
+      greaterThan(tester.getTopLeft(find.text('JMdict')).dy),
+    );
+    await tester.tap(find.text('Add my definition'));
+    await tester.pumpAndSettle();
+    expect(find.widgetWithText(TextField, '食べる'), findsOneWidget);
+    expect(find.widgetWithText(TextField, 'たべる'), findsOneWidget);
+    await tester.enterText(find.widgetWithText(TextField, 'Definition'), 'eat');
+    await tester.pump();
+    await tester.tap(find.text('Save'));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(GroupedDictionaryEntryHeader), findsOneWidget);
+    expect(
+      tester.getTopLeft(find.text('My definitions')).dy,
+      lessThan(tester.getTopLeft(find.text('JMdict')).dy),
+    );
+    expect(find.text('Ichidan verb'), findsOneWidget);
   });
 
   testWidgets('refreshes pitch accents when the lookup term changes', (

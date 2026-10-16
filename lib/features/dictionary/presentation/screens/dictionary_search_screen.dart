@@ -9,6 +9,7 @@ import 'package:mekuru/features/dictionary/data/services/dictionary_query_servic
 import 'package:mekuru/features/dictionary/presentation/providers/dictionary_providers.dart';
 import 'package:mekuru/features/dictionary/presentation/screens/dictionary_manager_screen.dart';
 import 'package:mekuru/features/dictionary/presentation/widgets/kanji_stroke_order.dart';
+import 'package:mekuru/features/dictionary/presentation/widgets/user_definition_dialog.dart';
 import 'package:mekuru/features/settings/presentation/providers/app_settings_providers.dart';
 import 'package:mekuru/features/settings/presentation/screens/downloads_screen.dart';
 import 'package:mekuru/features/settings/presentation/widgets/starter_pack_card.dart';
@@ -251,6 +252,12 @@ class DictionarySearchScreenState extends ConsumerState<DictionarySearchScreen>
     }
   }
 
+  /// Runs the shown search again, after a setting, the dictionaries or the
+  /// user's own definitions changed.
+  void _searchAgain() {
+    if (_lastQuery.isNotEmpty) _performSearch(_lastQuery);
+  }
+
   void _navigateToWord(String word) {
     final route = namedRoute<void>(
       'dictionary_search',
@@ -335,18 +342,10 @@ class DictionarySearchScreenState extends ConsumerState<DictionarySearchScreen>
     final hasDictionaries = ref.watch(dictionariesProvider);
 
     // Re-search when Roman letter filter changes
-    ref.listen(filterRomanLettersProvider, (_, _) {
-      if (_lastQuery.isNotEmpty) {
-        _performSearch(_lastQuery);
-      }
-    });
+    ref.listen(filterRomanLettersProvider, (_, _) => _searchAgain());
 
     // Re-search when dictionaries are enabled/disabled/added/removed
-    ref.listen(dictionariesProvider, (_, _) {
-      if (_lastQuery.isNotEmpty) {
-        _performSearch(_lastQuery);
-      }
-    });
+    ref.listen(dictionariesProvider, (_, _) => _searchAgain());
 
     return Scaffold(
       appBar: AppBar(
@@ -555,16 +554,28 @@ class DictionarySearchScreenState extends ConsumerState<DictionarySearchScreen>
     }
 
     final groupedResults = _groupedResults;
+    final addDefinition = AddUserDefinitionButton(
+      term: _controller.text.trim(),
+      results: (groupedResults ?? const []).expand((group) => group.entries),
+      onAdded: _searchAgain,
+    );
     if (groupedResults == null || groupedResults.isEmpty) {
       if (_isSearching) {
         return const Center(child: CircularProgressIndicator());
       }
       return Center(
-        child: Text(
-          context.l10n.dictionaryNoResultsFound,
-          style: theme.textTheme.bodyLarge?.copyWith(
-            color: theme.colorScheme.onSurfaceVariant,
-          ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              context.l10n.dictionaryNoResultsFound,
+              style: theme.textTheme.bodyLarge?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+            ),
+            const SizedBox(height: 8),
+            addDefinition,
+          ],
         ),
       );
     }
@@ -625,20 +636,26 @@ class DictionarySearchScreenState extends ConsumerState<DictionarySearchScreen>
               fontSize: fontSize,
               onWordTap: _navigateToWord,
               sliver: true,
+              onUserDefinitionChanged: _searchAgain,
             ),
           ],
         ),
-        if (index < groupedResults.length - 1)
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Divider(
-                height: 1,
-                color: theme.colorScheme.outlineVariant.withValues(alpha: 0.4),
-              ),
+        SliverToBoxAdapter(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Divider(
+              height: 1,
+              color: theme.colorScheme.outlineVariant.withValues(alpha: 0.4),
             ),
           ),
+        ),
       ],
+      SliverToBoxAdapter(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 4),
+          child: Center(child: addDefinition),
+        ),
+      ),
       SliverToBoxAdapter(
         child: SizedBox(height: 16 + glassTabBarInset(context)),
       ),

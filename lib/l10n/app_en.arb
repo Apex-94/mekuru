@@ -5906,7 +5906,7 @@
   },
   "userDefinitionAdd": "Add my definition",
   "@userDefinitionAdd": {
-    "description": "Button in the lookup sheet, shown when no dictionary has the word, that opens a form to write a definition for it."
+    "description": "Button at the end of lookup and dictionary search results, and when nothing is found, that opens a form to write a definition for the word."
   },
   "userDefinitionEdit": "Edit my definition",
   "@userDefinitionEdit": {

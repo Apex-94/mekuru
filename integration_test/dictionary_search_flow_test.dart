@@ -43,6 +43,54 @@ void main() {
     expect(find.text('JMdict'), findsWidgets);
   });
 
+  testWidgets('a definition added after the results joins the word, first', (
+    tester,
+  ) async {
+    final db = createTestDatabase();
+    addTearDown(db.close);
+    await seedDictionaries(db);
+
+    await tester.pumpWidget(
+      buildIntegrationTestApp(db: db, home: const DictionarySearchScreen()),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.enterText(find.byType(TextField), '食べる');
+    await tester.pump(const Duration(milliseconds: 400));
+    final addButton = find.text(l10n.userDefinitionAdd);
+    await pumpUntilVisible(
+      tester,
+      addButton,
+      timeout: const Duration(seconds: 10),
+    );
+    await tester.ensureVisible(addButton);
+    await tester.pumpAndSettle();
+    await tester.tap(addButton);
+    await tester.pumpAndSettle();
+
+    // The reading comes from the dictionary's 食べる, so the definition
+    // joins that word's card.
+    expect(find.widgetWithText(TextField, 'たべる'), findsOneWidget);
+    await tester.enterText(
+      find.widgetWithText(TextField, l10n.userDefinitionDefinitionLabel),
+      'my own meaning',
+    );
+    await tester.pump();
+    await tester.tap(find.text(l10n.commonSave));
+    await pumpUntilVisible(
+      tester,
+      find.text(l10n.userDictionaryName),
+      timeout: const Duration(seconds: 10),
+    );
+    await tester.pumpAndSettle();
+
+    final jmdictLabel = find.text('JMdict').first;
+    expect(
+      tester.getTopLeft(find.text(l10n.userDictionaryName)).dy,
+      lessThan(tester.getTopLeft(jmdictLabel).dy),
+    );
+  });
+
   testWidgets('search with no matches shows empty state', (tester) async {
     final db = createTestDatabase();
     addTearDown(db.close);

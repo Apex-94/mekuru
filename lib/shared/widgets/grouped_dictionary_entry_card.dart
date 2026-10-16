@@ -139,15 +139,29 @@ class _GroupedDictionaryEntryHeaderState
 
   DictionaryEntryWithSource get _primaryResult => widget.entries.first;
   DictionaryEntry get _primaryEntry => _primaryResult.entry;
+
+  /// The first entry from an imported dictionary, for the part of speech and
+  /// kanji details: the user's own definitions, which can come first, have
+  /// neither.
+  DictionaryEntryWithSource get _taggedResult => widget.entries.firstWhere(
+    (r) => r.entry.dictionaryId != userDictionaryId,
+    orElse: () => _primaryResult,
+  );
+
+  KanjiEntryDisplayData? _parseKanjiDisplayData() {
+    final result = _taggedResult;
+    return parseKanjiEntryDisplayData(
+      entry: result.entry,
+      dictionaryName: result.dictionaryName,
+    );
+  }
+
   int? get _frequencyRank => _primaryResult.frequencyRank;
 
   @override
   void initState() {
     super.initState();
-    _kanjiDisplayData = parseKanjiEntryDisplayData(
-      entry: _primaryEntry,
-      dictionaryName: _primaryResult.dictionaryName,
-    );
+    _kanjiDisplayData = _parseKanjiDisplayData();
     _checkIfSaved();
     _checkIfInAnki();
     ref.listenManual(ankidroidConfigProvider, (previous, next) {
@@ -164,10 +178,7 @@ class _GroupedDictionaryEntryHeaderState
         oldWidget.entries.first.entry.reading != _primaryEntry.reading;
 
     if (_didEntriesChange(oldWidget.entries, widget.entries)) {
-      _kanjiDisplayData = parseKanjiEntryDisplayData(
-        entry: _primaryEntry,
-        dictionaryName: _primaryResult.dictionaryName,
-      );
+      _kanjiDisplayData = _parseKanjiDisplayData();
     }
     if (entryChanged) {
       _checkIfSaved();
@@ -453,7 +464,7 @@ class _GroupedDictionaryEntryHeaderState
     );
 
     final actionButtons = _buildActionButtons();
-    final partOfSpeech = PartOfSpeechResolver.resolve(_primaryEntry);
+    final partOfSpeech = PartOfSpeechResolver.resolve(_taggedResult.entry);
 
     return Padding(
       padding: widget.padding,

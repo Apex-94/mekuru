@@ -173,7 +173,9 @@ void main() {
     await _pumpSearchScreen(tester, db, service);
     await tester.tap(find.byType(TextField));
     await tester.pump();
-    final focusNode = tester.widget<TextField>(find.byType(TextField)).focusNode!;
+    final focusNode = tester
+        .widget<TextField>(find.byType(TextField))
+        .focusNode!;
     expect(focusNode.hasFocus, isTrue);
 
     await tester.tapAt(const Offset(400, 500));
@@ -290,6 +292,48 @@ void main() {
 
     expect(find.text('Ichidan verb'), findsOneWidget);
     expect(find.text('Transitive verb'), findsOneWidget);
+  });
+
+  group('Add my definition', () {
+    testWidgets('comes after the results, with the word\'s reading', (
+      tester,
+    ) async {
+      SharedPreferences.setMockInitialValues({});
+      final db = AppDatabase(NativeDatabase.memory());
+      addTearDown(db.close);
+      await _pumpSearchScreen(
+        tester,
+        db,
+        _buildService(db),
+        initialQuery: '食べる',
+      );
+      await tester.pump(const Duration(milliseconds: 300));
+
+      expect(
+        tester.getTopLeft(find.text('Add my definition')).dy,
+        greaterThan(tester.getTopLeft(find.text('JMdict')).dy),
+      );
+      await tester.tap(find.text('Add my definition'));
+      await tester.pumpAndSettle();
+      expect(find.widgetWithText(TextField, '食べる'), findsWidgets);
+      expect(find.widgetWithText(TextField, 'たべる'), findsOneWidget);
+    });
+
+    testWidgets('is offered when nothing is found', (tester) async {
+      SharedPreferences.setMockInitialValues({});
+      final db = AppDatabase(NativeDatabase.memory());
+      addTearDown(db.close);
+      await _pumpSearchScreen(
+        tester,
+        db,
+        _buildService(db),
+        initialQuery: 'ぴえん',
+      );
+      await tester.pump(const Duration(milliseconds: 300));
+
+      expect(find.text('No results found.'), findsOneWidget);
+      expect(find.text('Add my definition'), findsOneWidget);
+    });
   });
 
   testWidgets('keeps each top-level word header sticky until the next word', (

@@ -7436,7 +7436,7 @@ abstract class AppLocalizations {
   /// **'Delete My definitions?\nEvery definition you wrote yourself will be lost. This cannot be undone.'**
   String get userDictionaryDeleteBody;
 
-  /// Button in the lookup sheet, shown when no dictionary has the word, that opens a form to write a definition for it.
+  /// Button at the end of lookup and dictionary search results, and when nothing is found, that opens a form to write a definition for the word.
   ///
   /// In en, this message translates to:
   /// **'Add my definition'**

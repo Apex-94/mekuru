@@ -302,18 +302,21 @@ class DictionaryRepository {
     return batchInsertEntries(added);
   }
 
+  /// Creates the user dictionary ahead of every other one, so the user's own
+  /// definitions come first until they drag it elsewhere.
   Future<void> _ensureUserDictionary() async {
     final existing = await (_db.select(
       _db.dictionaryMetas,
     )..where((t) => t.id.equals(userDictionaryId))).getSingleOrNull();
     if (existing != null) return;
+    final firstOrder = (await getAllDictionaries()).firstOrNull?.sortOrder;
     await _db
         .into(_db.dictionaryMetas)
         .insert(
           DictionaryMetasCompanion.insert(
             id: const Value(userDictionaryId),
             name: userDictionaryName,
-            sortOrder: Value(await getNextSortOrder()),
+            sortOrder: Value((firstOrder ?? 1) - 1),
           ),
         );
   }

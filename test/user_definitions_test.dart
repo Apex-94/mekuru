@@ -1,4 +1,4 @@
-import 'package:drift/drift.dart' show driftRuntimeOptions;
+import 'package:drift/drift.dart' show Value, driftRuntimeOptions;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mekuru/core/database/database_provider.dart';
 import 'package:mekuru/features/backup/data/services/backup_serializer.dart';
@@ -34,7 +34,7 @@ void main() {
   Future<List<DictionaryEntry>> userEntries() => repo.getUserDefinitions();
 
   group('user definitions', () {
-    test('adding the first one creates the user dictionary after the others '
+    test('adding the first one creates the user dictionary before the others '
         'and is found by lookup and English search', () async {
       await repo.insertDictionary('JMdict');
       await repo.addUserDefinition(
@@ -43,7 +43,7 @@ void main() {
         definition: 'Crying emoji feeling\nused online',
       );
 
-      final meta = (await repo.getAllDictionaries()).last;
+      final meta = (await repo.getAllDictionaries()).first;
       expect(meta.id, userDictionaryId);
       expect(meta.name, DictionaryRepository.userDictionaryName);
       expect(meta.isEnabled, isTrue);
@@ -60,6 +60,36 @@ void main() {
       final english = await queryService.glossarySearchWithSource('emoji');
       expect(english.map((r) => r.entry.id), [entry.id]);
       await expectGlossaryFtsConsistent(db);
+    });
+
+    test('a definition of a word a dictionary has comes before its entry, '
+        'until the user dictionary is moved down', () async {
+      final jmdictId = await repo.insertDictionary('JMdict');
+      await repo.batchInsertEntries([
+        DictionaryEntriesCompanion.insert(
+          expression: '食べる',
+          reading: const Value('たべる'),
+          glossaries: '["to eat"]',
+          dictionaryId: jmdictId,
+        ),
+      ]);
+      await repo.addUserDefinition(
+        term: '食べる',
+        reading: 'たべる',
+        definition: 'eat',
+      );
+
+      Future<List<String>> sources() async {
+        queryService.invalidateMetasCache();
+        return [
+          for (final r in await queryService.searchLookupWithSource('食べる'))
+            r.dictionaryName,
+        ];
+      }
+
+      expect(await sources(), ['My definitions', 'JMdict']);
+      await repo.reorderDictionaries([jmdictId, userDictionaryId]);
+      expect(await sources(), ['JMdict', 'My definitions']);
     });
 
     test('a second one reuses the user dictionary', () async {

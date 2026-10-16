@@ -220,15 +220,6 @@ class _LookupSheetState extends ConsumerState<LookupSheet>
     if (mounted) setState(_refreshLookupFutures);
   }
 
-  Future<void> _addUserDefinition() async {
-    if (await showUserDefinitionDialog(
-      context,
-      term: _editedText ?? widget.selectedText,
-    )) {
-      _onUserDefinitionChanged();
-    }
-  }
-
   void _onEditSubmitted(String value) {
     final trimmedValue = value.trim();
     if (trimmedValue.isEmpty) {
@@ -508,6 +499,11 @@ class _LookupSheetState extends ConsumerState<LookupSheet>
           );
         }
         final results = snapshot.data ?? [];
+        final addDefinition = AddUserDefinitionButton(
+          term: _editedText ?? widget.selectedText,
+          results: results,
+          onAdded: _onUserDefinitionChanged,
+        );
         if (results.isEmpty && noDictionaries) {
           return SingleChildScrollView(
             controller: scrollController,
@@ -532,11 +528,7 @@ class _LookupSheetState extends ConsumerState<LookupSheet>
               children: [
                 Text(context.l10n.dictionaryNoResultsFound),
                 const SizedBox(height: 8),
-                TextButton.icon(
-                  onPressed: _addUserDefinition,
-                  icon: const Icon(Icons.add),
-                  label: Text(context.l10n.userDefinitionAdd),
-                ),
+                addDefinition,
               ],
             ),
           );
@@ -611,9 +603,14 @@ class _LookupSheetState extends ConsumerState<LookupSheet>
                       ),
                     ],
                   ),
-                  if (index < groups.length - 1)
-                    const SliverToBoxAdapter(child: Divider(height: 1)),
+                  const SliverToBoxAdapter(child: Divider(height: 1)),
                 ],
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 4),
+                    child: Center(child: addDefinition),
+                  ),
+                ),
               ],
             );
           },
