@@ -378,7 +378,14 @@ class OcrStoreService {
         'purchaseId': details.purchaseID,
       });
 
-      if (!ocrAllProductIds.contains(details.productID)) {
+      // The plugin reports a sheet that closed without a purchase (cancel,
+      // failed payment) under an empty product ID: it answers the waiting flow.
+      final endedWithoutPurchase =
+          details.productID.isEmpty &&
+          (details.status == PurchaseStatus.canceled ||
+              details.status == PurchaseStatus.error);
+      if (!endedWithoutPurchase &&
+          !ocrAllProductIds.contains(details.productID)) {
         continue;
       }
 
@@ -771,6 +778,9 @@ class OcrStoreService {
   }
 
   void _completeWaiterWithError(String productId, OcrBillingException error) {
+    // No product: the billing flow that just ended, and Play shows one at a
+    // time, so every waiter left belongs to a flow that is over.
+    if (productId.isEmpty) return _completeAllPendingWithError(error);
     final queue = _pendingWaiters[productId];
     if (queue == null || queue.isEmpty) {
       return;

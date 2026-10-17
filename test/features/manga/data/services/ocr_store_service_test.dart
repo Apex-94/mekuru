@@ -777,6 +777,34 @@ void main() {
         },
       );
 
+      for (final (status, code) in [
+        (PurchaseStatus.canceled, 'purchase_cancelled'),
+        (PurchaseStatus.error, 'payment_declined'),
+      ]) {
+        test('a ${status.name} flow with no product answers the waiting buyer '
+            'with $code', () async {
+          final noPurchase = PurchaseDetails(
+            purchaseID: '',
+            productID: '',
+            status: status,
+            transactionDate: null,
+            verificationData: PurchaseVerificationData(
+              localVerificationData: '',
+              serverVerificationData: '',
+              source: 'google_play',
+            ),
+          );
+
+          await expectLater(
+            h.buyAndDeliver(proUnlockProductId, noPurchase),
+            throwsA(
+              isA<OcrBillingException>().having((e) => e.code, 'code', code),
+            ),
+          );
+          expect(h.hasEntitlement, isFalse);
+        }, timeout: const Timeout(Duration(seconds: 5)));
+      }
+
       test('surfaces purchase_not_started when Play refuses to open the '
           'sheet', () async {
         h.iap.buyStarts = false;
