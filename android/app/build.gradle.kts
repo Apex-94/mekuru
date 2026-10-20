@@ -353,6 +353,18 @@ android {
         }
     }
 
+    bundle {
+        language {
+            // Play adds a missing language split to a running app without
+            // restarting it. On Android 10 the process keeps the removed APK
+            // path, and libsqlite3.so / libmecab_dart.so (native-asset builds,
+            // no DT_SONAME) can no longer be found: every query and lookup
+            // fails until the app is killed (MEKURU-2E, MEKURU-2J). Keeping
+            // all languages in the base APK means no split is ever added.
+            enableSplit = false
+        }
+    }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
