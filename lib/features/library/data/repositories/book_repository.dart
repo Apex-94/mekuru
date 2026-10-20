@@ -1090,7 +1090,10 @@ class BookRepository {
   /// For manga: deletes only the cache directory. Original images are
   /// kept since they belong to the user.
   Future<void> deleteBook(int bookId) async {
-    if (LocalMangaOcr.available) {
+    // iOS scans run in the app; without the stop request a scan of this
+    // book keeps going and writes into the folder deleted below.
+    if (LocalMangaOcr.available ||
+        defaultTargetPlatform == TargetPlatform.iOS) {
       await clearOcrTaskState(bookId);
     }
     final book = await getBookById(bookId);

@@ -3,13 +3,16 @@ import 'dart:io';
 
 import 'package:archive/archive.dart';
 import 'package:drift/drift.dart' show Value;
+import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:image/image.dart' as img;
 import 'package:mekuru/core/database/database_provider.dart';
 import 'package:mekuru/features/library/data/repositories/book_repository.dart';
+import 'package:mekuru/features/manga/data/services/ocr_background_worker.dart';
 import 'package:path/path.dart' as p;
 // ignore: depend_on_referenced_packages
 import 'package:path_provider_platform_interface/path_provider_platform_interface.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../shared/fake_path_provider.dart';
 import '../../shared/test_database.dart';
@@ -402,6 +405,22 @@ void main() {
       expect(wrapper.existsSync(), isFalse);
       expect(await repo.getBookById(id), isNull);
     });
+
+    test(
+      'on iOS, stops a running scan of the book before deleting it',
+      () async {
+        SharedPreferences.setMockInitialValues({});
+        debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
+        addTearDown(() => debugDefaultTargetPlatformOverride = null);
+        final dir = plantDir('manga_7');
+        final id = await insertManga('manga_7');
+
+        await repo.deleteBook(id);
+
+        expect(await loadOcrStopRequest(id), OcrStopRequest.deleted);
+        expect(dir.existsSync(), isFalse);
+      },
+    );
 
     test('a malformed row can never delete the books root', () async {
       final survivor = plantDir('manga_1');
