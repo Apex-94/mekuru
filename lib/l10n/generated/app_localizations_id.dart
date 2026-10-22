@@ -865,6 +865,46 @@ class AppLocalizationsId extends AppLocalizations {
       'Ini akan membebaskan sekitar 250 MB ruang penyimpanan. Pada peluncuran berikutnya, aplikasi akan kembali ke kamus bawaan. Anda bisa mengunduhnya lagi nanti dari layar ini.';
 
   @override
+  String get downloadsAudioPackTitle => 'Japanese Word Audio Pack';
+
+  @override
+  String get downloadsAudioPackDescription =>
+      'Native word audio recordings (~180 MB). Falls back to on-device TTS when uninstalled.';
+
+  @override
+  String downloadsAudioPackInstalled({
+    required String count,
+    required String size,
+  }) {
+    return 'Installed ($count words • $size)';
+  }
+
+  @override
+  String downloadsAudioPackDownloadingPercent({required int percent}) {
+    return 'Downloading audio pack... $percent%';
+  }
+
+  @override
+  String get downloadsAudioPackExtracting => 'Extracting and indexing audio...';
+
+  @override
+  String get downloadsAudioPackImportZip => 'Import .zip';
+
+  @override
+  String get downloadsAudioPackImportTooltip =>
+      'Import custom audio pack (.zip)';
+
+  @override
+  String get downloadsAudioPackConfirmDeleteTitle => 'Delete audio pack?';
+
+  @override
+  String get downloadsAudioPackConfirmDeleteBody =>
+      'Delete installed Japanese word audio recordings? Word pronunciations will instantly fall back to on-device TTS.';
+
+  @override
+  String get downloadsAudioPackDeleteTooltip => 'Delete audio pack';
+
+  @override
   String get commonClear => 'Bersihkan';
 
   @override

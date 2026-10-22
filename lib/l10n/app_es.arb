@@ -885,6 +885,59 @@
   "@downloadsEnhancedFuriganaConfirmRemoveBody": {
     "description": "Dialog body confirming removal of the enhanced furigana dictionary."
   },
+  "downloadsAudioPackTitle": "Paquete de audio de palabras en japonés",
+  "@downloadsAudioPackTitle": {
+    "description": "Title for the Japanese word audio pronunciation pack download tile."
+  },
+  "downloadsAudioPackDescription": "Grabaciones de audio de palabras (~180 MB). Usa TTS en el dispositivo cuando no esté instalado.",
+  "@downloadsAudioPackDescription": {
+    "description": "Subtitle shown when the Japanese word audio pack is not installed."
+  },
+  "downloadsAudioPackInstalled": "Instalado ({count} palabras • {size})",
+  "@downloadsAudioPackInstalled": {
+    "description": "Subtitle shown when the Japanese word audio pack is installed.",
+    "placeholders": {
+      "count": {
+        "type": "String"
+      },
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "downloadsAudioPackDownloadingPercent": "Descargando paquete de audio... {percent}%",
+  "@downloadsAudioPackDownloadingPercent": {
+    "description": "Progress message while downloading the Japanese word audio pack.",
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
+  "downloadsAudioPackExtracting": "Extrayendo e indexando audio...",
+  "@downloadsAudioPackExtracting": {
+    "description": "Progress message shown while extracting and indexing the audio pack."
+  },
+  "downloadsAudioPackImportZip": "Importar .zip",
+  "@downloadsAudioPackImportZip": {
+    "description": "Button label to import a custom Yomitan or community audio pack zip file."
+  },
+  "downloadsAudioPackImportTooltip": "Importar paquete de audio (.zip)",
+  "@downloadsAudioPackImportTooltip": {
+    "description": "Tooltip for the import audio pack button."
+  },
+  "downloadsAudioPackConfirmDeleteTitle": "¿Eliminar paquete de audio?",
+  "@downloadsAudioPackConfirmDeleteTitle": {
+    "description": "Dialog title confirming deletion of the installed audio pack."
+  },
+  "downloadsAudioPackConfirmDeleteBody": "¿Eliminar grabaciones de audio de palabras en japonés? Las pronunciaciones usarán inmediatamente TTS en el dispositivo.",
+  "@downloadsAudioPackConfirmDeleteBody": {
+    "description": "Dialog body confirming deletion of the installed audio pack."
+  },
+  "downloadsAudioPackDeleteTooltip": "Eliminar paquete de audio",
+  "@downloadsAudioPackDeleteTooltip": {
+    "description": "Tooltip for deleting the installed audio pack."
+  },
   "commonClear": "Limpiar",
   "@commonClear": {
     "description": "Generic clear action."

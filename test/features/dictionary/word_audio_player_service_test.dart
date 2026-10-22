@@ -1,12 +1,11 @@
 import 'dart:io';
-import 'dart:typed_data';
+import 'package:archive/archive.dart';
 import 'package:audioplayers/audioplayers.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_tts/flutter_tts.dart';
-import 'package:http/http.dart' as http;
-import 'package:http/testing.dart';
 import 'package:mekuru/features/dictionary/data/models/word_audio_models.dart';
-import 'package:mekuru/features/dictionary/data/services/word_audio_cache_manager.dart';
+import 'package:mekuru/features/dictionary/data/services/audio_pack_manager.dart';
 import 'package:mekuru/features/dictionary/data/services/word_audio_player_service.dart';
 
 class _FakeAudioPlayer extends AudioPlayer {
@@ -15,7 +14,8 @@ class _FakeAudioPlayer extends AudioPlayer {
   bool disposeCalled = false;
 
   @override
-  Future<void> play(Source source, {
+  Future<void> play(
+    Source source, {
     double? volume,
     double? balance,
     AudioContext? ctx,
@@ -63,14 +63,27 @@ class _FakeFlutterTts extends FlutterTts {
 }
 
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+
   late Directory tempDir;
-  late WordAudioCacheManager cacheManager;
+  late AudioPackManager audioPackManager;
   late _FakeAudioPlayer fakeAudioPlayer;
   late _FakeFlutterTts fakeFlutterTts;
 
   setUp(() async {
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(
+      const MethodChannel('xyz.luan/audioplayers.global'),
+      (call) async => 1,
+    );
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(
+      const MethodChannel('xyz.luan/audioplayers'),
+      (call) async => 1,
+    );
+
     tempDir = await Directory.systemTemp.createTemp('mekuru_player_test_');
-    cacheManager = WordAudioCacheManager(supportDirProvider: () async => tempDir);
+    audioPackManager = AudioPackManager(supportDirProvider: () async => tempDir);
     fakeAudioPlayer = _FakeAudioPlayer();
     fakeFlutterTts = _FakeFlutterTts();
   });
@@ -81,102 +94,82 @@ void main() {
     }
   });
 
-  Uint8List createValidAudioBytes() {
-    final bytes = Uint8List(600);
-    bytes[0] = 0x49; // 'I'
-    bytes[1] = 0x44; // 'D'
-    bytes[2] = 0x33; // '3'
-    return bytes;
+  Future<void> seedAudioPackWithWord({
+    required String expression,
+    required String reading,
+  }) async {
+    final archive = Archive();
+    final fileData = List<int>.generate(100, (i) => i % 256);
+    archive.addFile(
+      ArchiveFile('audio/${expression}_$reading.mp3', fileData.length, fileData),
+    );
+    final zipData = ZipEncoder().encode(archive);
+    final zipFile = File('${tempDir.path}/seed.zip');
+    zipFile.writeAsBytesSync(zipData);
+    await audioPackManager.importZip(zipFile);
   }
 
-  group('WordAudioPlayerService', () {
-    test('Tier 1: Plays cached file immediately without network request', () async {
-      final validBytes = createValidAudioBytes();
-      await cacheManager.saveAudioBytes(
-        expression: '食べる',
-        reading: 'たべる',
-        bytes: validBytes,
-      );
-
-      bool networkHit = false;
-      final mockClient = MockClient((request) async {
-        networkHit = true;
-        return http.Response('not hit', 500);
-      });
+  group('WordAudioPlayerService (Strict 2-Tier Pipeline)', () {
+    test('Tier 1: Plays audio from downloaded pack when word exists', () async {
+      await seedAudioPackWithWord(expression: '食べる', reading: 'たべる');
 
       final service = WordAudioPlayerService(
-        cacheManager: cacheManager,
-        httpClient: mockClient,
+        audioPackManager: audioPackManager,
         audioPlayer: fakeAudioPlayer,
         flutterTts: fakeFlutterTts,
       );
 
       await service.play(expression: '食べる', reading: 'たべる');
 
-      expect(networkHit, isFalse);
       expect(fakeAudioPlayer.lastPlayedSource, isA<DeviceFileSource>());
       expect(fakeFlutterTts.lastSpokenText, isNull);
       expect(service.currentState.status, AudioPlaybackStatus.playing);
+      expect(service.currentState.sourceType, WordAudioSourceType.downloadedPack);
 
       await service.dispose();
     });
 
-    test('Tier 2: Downloads online audio and caches to disk when un-cached', () async {
-      final validBytes = createValidAudioBytes();
-      final mockClient = MockClient((request) async {
-        expect(request.url.queryParameters['kanji'], '本');
-        expect(request.url.queryParameters['kana'], 'ほん');
-        return http.Response.bytes(validBytes, 200);
-      });
-
+    test('Tier 2: Immediately falls back to on-device TTS on pack miss', () async {
+      // Audio pack is empty or does not contain '本'
       final service = WordAudioPlayerService(
-        cacheManager: cacheManager,
-        httpClient: mockClient,
+        audioPackManager: audioPackManager,
         audioPlayer: fakeAudioPlayer,
         flutterTts: fakeFlutterTts,
       );
 
       await service.play(expression: '本', reading: 'ほん');
 
-      expect(fakeAudioPlayer.lastPlayedSource, isA<DeviceFileSource>());
-      final cachedFile = await cacheManager.getCachedAudioFile(
-        expression: '本',
-        reading: 'ほん',
-      );
-      expect(cachedFile, isNotNull);
+      expect(fakeAudioPlayer.lastPlayedSource, isNull);
+      expect(fakeFlutterTts.lastSpokenText, 'ほん');
       expect(service.currentState.status, AudioPlaybackStatus.playing);
+      expect(service.currentState.sourceType, WordAudioSourceType.ttsFallback);
 
       await service.dispose();
     });
 
-    test('Tier 3: Falls back to on-device TTS when network request returns 404', () async {
-      final mockClient = MockClient((request) async {
-        return http.Response('Not Found', 404);
-      });
-
+    test('Tier 2 TTS fallback uses expression when reading is null/empty', () async {
       final service = WordAudioPlayerService(
-        cacheManager: cacheManager,
-        httpClient: mockClient,
+        audioPackManager: audioPackManager,
         audioPlayer: fakeAudioPlayer,
         flutterTts: fakeFlutterTts,
       );
 
-      await service.play(expression: '私', reading: 'わたし');
+      await service.play(expression: 'こんにちは');
 
-      expect(fakeFlutterTts.lastSpokenText, 'わたし');
-      expect(service.currentState.status, AudioPlaybackStatus.playing);
+      expect(fakeFlutterTts.lastSpokenText, 'こんにちは');
+      expect(service.currentState.sourceType, WordAudioSourceType.ttsFallback);
 
       await service.dispose();
     });
 
     test('stop() cancels both AudioPlayer and FlutterTts and emits idle', () async {
       final service = WordAudioPlayerService(
-        cacheManager: cacheManager,
-        httpClient: http.Client(),
+        audioPackManager: audioPackManager,
         audioPlayer: fakeAudioPlayer,
         flutterTts: fakeFlutterTts,
       );
 
+      await service.play(expression: '猫', reading: 'ねこ');
       await service.stop();
 
       expect(fakeAudioPlayer.stopCalled, isTrue);

@@ -1503,6 +1503,69 @@ abstract class AppLocalizations {
   /// **'This frees ~250 MB of storage. On next launch the app will fall back to the bundled dictionary. You can re-download later from this screen.'**
   String get downloadsEnhancedFuriganaConfirmRemoveBody;
 
+  /// Title for the Japanese word audio pronunciation pack download tile.
+  ///
+  /// In en, this message translates to:
+  /// **'Japanese Word Audio Pack'**
+  String get downloadsAudioPackTitle;
+
+  /// Subtitle shown when the Japanese word audio pack is not installed.
+  ///
+  /// In en, this message translates to:
+  /// **'Native word audio recordings (~180 MB). Falls back to on-device TTS when uninstalled.'**
+  String get downloadsAudioPackDescription;
+
+  /// Subtitle shown when the Japanese word audio pack is installed.
+  ///
+  /// In en, this message translates to:
+  /// **'Installed ({count} words • {size})'**
+  String downloadsAudioPackInstalled({
+    required String count,
+    required String size,
+  });
+
+  /// Progress message while downloading the Japanese word audio pack.
+  ///
+  /// In en, this message translates to:
+  /// **'Downloading audio pack... {percent}%'**
+  String downloadsAudioPackDownloadingPercent({required int percent});
+
+  /// Progress message shown while extracting and indexing the audio pack.
+  ///
+  /// In en, this message translates to:
+  /// **'Extracting and indexing audio...'**
+  String get downloadsAudioPackExtracting;
+
+  /// Button label to import a custom Yomitan or community audio pack zip file.
+  ///
+  /// In en, this message translates to:
+  /// **'Import .zip'**
+  String get downloadsAudioPackImportZip;
+
+  /// Tooltip for the import audio pack button.
+  ///
+  /// In en, this message translates to:
+  /// **'Import custom audio pack (.zip)'**
+  String get downloadsAudioPackImportTooltip;
+
+  /// Dialog title confirming deletion of the installed audio pack.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete audio pack?'**
+  String get downloadsAudioPackConfirmDeleteTitle;
+
+  /// Dialog body confirming deletion of the installed audio pack.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete installed Japanese word audio recordings? Word pronunciations will instantly fall back to on-device TTS.'**
+  String get downloadsAudioPackConfirmDeleteBody;
+
+  /// Tooltip for deleting the installed audio pack.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete audio pack'**
+  String get downloadsAudioPackDeleteTooltip;
+
   /// Generic clear action.
   ///
   /// In en, this message translates to:

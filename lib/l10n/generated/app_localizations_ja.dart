@@ -838,6 +838,46 @@ class AppLocalizationsJa extends AppLocalizations {
       '約250 MBのストレージが空きます。次回の起動からは内蔵の辞書が使われます。この画面から後で再ダウンロードできます。';
 
   @override
+  String get downloadsAudioPackTitle => 'Japanese Word Audio Pack';
+
+  @override
+  String get downloadsAudioPackDescription =>
+      'Native word audio recordings (~180 MB). Falls back to on-device TTS when uninstalled.';
+
+  @override
+  String downloadsAudioPackInstalled({
+    required String count,
+    required String size,
+  }) {
+    return 'Installed ($count words • $size)';
+  }
+
+  @override
+  String downloadsAudioPackDownloadingPercent({required int percent}) {
+    return 'Downloading audio pack... $percent%';
+  }
+
+  @override
+  String get downloadsAudioPackExtracting => 'Extracting and indexing audio...';
+
+  @override
+  String get downloadsAudioPackImportZip => 'Import .zip';
+
+  @override
+  String get downloadsAudioPackImportTooltip =>
+      'Import custom audio pack (.zip)';
+
+  @override
+  String get downloadsAudioPackConfirmDeleteTitle => 'Delete audio pack?';
+
+  @override
+  String get downloadsAudioPackConfirmDeleteBody =>
+      'Delete installed Japanese word audio recordings? Word pronunciations will instantly fall back to on-device TTS.';
+
+  @override
+  String get downloadsAudioPackDeleteTooltip => 'Delete audio pack';
+
+  @override
   String get commonClear => 'クリア';
 
   @override

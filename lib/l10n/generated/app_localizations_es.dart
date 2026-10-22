@@ -872,6 +872,48 @@ class AppLocalizationsEs extends AppLocalizations {
       'Esto libera unos 250 MB de almacenamiento. En el próximo inicio, la aplicación usará el diccionario incluido. Podrás volver a descargarlo más tarde desde esta pantalla.';
 
   @override
+  String get downloadsAudioPackTitle =>
+      'Paquete de audio de palabras en japonés';
+
+  @override
+  String get downloadsAudioPackDescription =>
+      'Grabaciones de audio de palabras (~180 MB). Usa TTS en el dispositivo cuando no esté instalado.';
+
+  @override
+  String downloadsAudioPackInstalled({
+    required String count,
+    required String size,
+  }) {
+    return 'Instalado ($count palabras • $size)';
+  }
+
+  @override
+  String downloadsAudioPackDownloadingPercent({required int percent}) {
+    return 'Descargando paquete de audio... $percent%';
+  }
+
+  @override
+  String get downloadsAudioPackExtracting => 'Extrayendo e indexando audio...';
+
+  @override
+  String get downloadsAudioPackImportZip => 'Importar .zip';
+
+  @override
+  String get downloadsAudioPackImportTooltip =>
+      'Importar paquete de audio (.zip)';
+
+  @override
+  String get downloadsAudioPackConfirmDeleteTitle =>
+      '¿Eliminar paquete de audio?';
+
+  @override
+  String get downloadsAudioPackConfirmDeleteBody =>
+      '¿Eliminar grabaciones de audio de palabras en japonés? Las pronunciaciones usarán inmediatamente TTS en el dispositivo.';
+
+  @override
+  String get downloadsAudioPackDeleteTooltip => 'Eliminar paquete de audio';
+
+  @override
   String get commonClear => 'Limpiar';
 
   @override

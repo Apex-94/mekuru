@@ -1,19 +1,14 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../data/models/word_audio_models.dart';
-import '../../data/services/word_audio_cache_manager.dart';
 import '../../data/services/word_audio_player_service.dart';
-
-/// Provider for the [WordAudioCacheManager] singleton.
-final wordAudioCacheManagerProvider = Provider<WordAudioCacheManager>((ref) {
-  return WordAudioCacheManager();
-});
+import 'audio_pack_providers.dart';
 
 /// Provider for the [WordAudioPlayerService].
 /// Disposes the underlying audio player and TTS resources when destroyed.
 final wordAudioPlayerServiceProvider = Provider<WordAudioPlayerService>((ref) {
-  final cacheManager = ref.watch(wordAudioCacheManagerProvider);
-  final service = WordAudioPlayerService(cacheManager: cacheManager);
+  final audioPackManager = ref.watch(audioPackManagerProvider);
+  final service = WordAudioPlayerService(audioPackManager: audioPackManager);
   ref.onDispose(service.dispose);
   return service;
 });

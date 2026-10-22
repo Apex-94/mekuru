@@ -1,23 +1,23 @@
 import 'dart:async';
+import 'dart:io';
+
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_tts/flutter_tts.dart';
-import 'package:http/http.dart' as http;
+import 'package:mekuru/core/services/usage_telemetry.dart';
 
 import '../models/word_audio_models.dart';
-import 'word_audio_cache_manager.dart';
+import 'audio_pack_manager.dart';
 import 'word_audio_resolver.dart';
 
-/// Service responsible for managing word pronunciation playback across:
-/// 1. Tier 1: Local disk cache (`<appSupport>/audio_cache/`)
-/// 2. Tier 2: Online endpoint (JapanesePod101 audio endpoint with caching)
-/// 3. Tier 3: Local TTS fallback (ja-JP)
+/// Strict 2-tier service responsible for word pronunciation playback:
+/// - Tier 1: Local downloaded audio pack (`AudioPackManager`, O(1) instant playback via `audioplayers`)
+/// - Tier 2: Instant on-device Japanese TTS fallback (`flutter_tts`, `ja-JP`)
 ///
-/// Configures audio sessions to ensure silent mode bypass on iOS
-/// (AVAudioSessionCategoryPlayback + mixWithOthers) and transient audio focus on Android.
+/// Lookups are 100% offline — zero HTTP network requests during reading.
+/// Audio sessions configure iOS silent mode bypass (`AVAudioSessionCategoryPlayback` + `mixWithOthers`).
 class WordAudioPlayerService {
-  final WordAudioCacheManager _cacheManager;
-  final http.Client _httpClient;
+  final AudioPackManager _audioPackManager;
   final AudioPlayer _audioPlayer;
   final FlutterTts _flutterTts;
 
@@ -32,12 +32,10 @@ class WordAudioPlayerService {
   bool _isTtsInitialized = false;
 
   WordAudioPlayerService({
-    required WordAudioCacheManager cacheManager,
-    http.Client? httpClient,
+    required AudioPackManager audioPackManager,
     AudioPlayer? audioPlayer,
     FlutterTts? flutterTts,
-  })  : _cacheManager = cacheManager,
-        _httpClient = httpClient ?? http.Client(),
+  })  : _audioPackManager = audioPackManager,
         _audioPlayer = audioPlayer ?? AudioPlayer(),
         _flutterTts = flutterTts ?? FlutterTts() {
     _initPlayerListeners();
@@ -82,7 +80,6 @@ class WordAudioPlayerService {
             category: AVAudioSessionCategory.playback,
             options: {
               AVAudioSessionOptions.mixWithOthers,
-              AVAudioSessionOptions.defaultToSpeaker,
             },
           ),
           android: AudioContextAndroid(
@@ -123,12 +120,10 @@ class WordAudioPlayerService {
     }
   }
 
-  /// Plays pronunciation for [expression] and [reading].
+  /// Plays pronunciation for [expression] and [reading] using the strict 2-tier pipeline:
   ///
-  /// Waterfall strategy:
-  /// 1. Tier 1: Check disk cache
-  /// 2. Tier 2: Fetch from JapanesePod101 URL and cache to disk
-  /// 3. Tier 3: On-device TTS fallback (ja-JP)
+  /// Tier 1: Check downloaded audio pack for local file.
+  /// Tier 2: Instant fallback to on-device ja-JP speech synthesis.
   Future<void> play({
     required String expression,
     String? reading,
@@ -140,67 +135,31 @@ class WordAudioPlayerService {
     // Stop any ongoing playback
     await stop();
 
-    _emit(AudioPlaybackState(
-      status: AudioPlaybackStatus.loading,
-      expression: exp,
-      reading: read,
-    ));
-
     await _ensureAudioContextConfigured();
 
-    // --- Tier 1: Local Cache ---
+    // ── Tier 1: Downloaded Audio Pack ──
     try {
-      final cachedFile = await _cacheManager.getCachedAudioFile(
+      final File? audioFile = await _audioPackManager.getAudioFile(
         expression: exp,
         reading: read,
       );
-      if (cachedFile != null) {
+
+      if (audioFile != null) {
         _emit(AudioPlaybackState(
           status: AudioPlaybackStatus.playing,
           expression: exp,
           reading: read,
+          sourceType: WordAudioSourceType.downloadedPack,
         ));
-        await _audioPlayer.play(DeviceFileSource(cachedFile.path));
+        await _audioPlayer.play(DeviceFileSource(audioFile.path));
+        logUsage('word_audio_played', attrs: {'source': 'pack'});
         return;
       }
     } catch (e) {
-      debugPrint('Tier 1 cache lookup failed: $e');
+      debugPrint('Tier 1 audio pack playback failed: $e');
     }
 
-    // --- Tier 2: Online Endpoint ---
-    bool onlineSucceeded = false;
-    try {
-      final url = WordAudioResolver.buildJapanesePod101Url(
-        expression: exp,
-        reading: read,
-      );
-      final response = await _httpClient
-          .get(Uri.parse(url))
-          .timeout(const Duration(seconds: 4));
-
-      if (response.statusCode == 200 &&
-          WordAudioResolver.isValidAudioBytes(response.bodyBytes)) {
-        final savedFile = await _cacheManager.saveAudioBytes(
-          expression: exp,
-          reading: read,
-          bytes: response.bodyBytes,
-        );
-        onlineSucceeded = true;
-        _emit(AudioPlaybackState(
-          status: AudioPlaybackStatus.playing,
-          expression: exp,
-          reading: read,
-        ));
-        await _audioPlayer.play(DeviceFileSource(savedFile.path));
-        return;
-      }
-    } catch (e) {
-      debugPrint('Tier 2 online fetch failed, falling back to TTS: $e');
-    }
-
-    if (onlineSucceeded) return;
-
-    // --- Tier 3: Offline TTS Fallback ---
+    // ── Tier 2: Instant On-Device Japanese TTS Fallback ──
     try {
       await _ensureTtsInitialized();
       final speechText = WordAudioResolver.resolveTtsSpeechText(
@@ -212,9 +171,10 @@ class WordAudioPlayerService {
         status: AudioPlaybackStatus.playing,
         expression: exp,
         reading: read,
+        sourceType: WordAudioSourceType.ttsFallback,
       ));
 
-      // Safety timer to prevent being stuck in 'playing' state if TTS completes silently
+      // Safety watchdog: returns state to idle if completion callback drops
       _ttsSafetyTimer?.cancel();
       _ttsSafetyTimer = Timer(const Duration(seconds: 4), () {
         if (_currentState.status == AudioPlaybackStatus.playing &&
@@ -224,10 +184,11 @@ class WordAudioPlayerService {
       });
 
       final dynamic result = await _flutterTts.speak(speechText);
-      // In flutter_tts, 1 indicates success on iOS/Android, 0 indicates failure
       if (result == 0) {
         _ttsSafetyTimer?.cancel();
         _emitError('TTS engine failed to speak');
+      } else {
+        logUsage('word_audio_played', attrs: {'source': 'tts'});
       }
     } catch (e) {
       _ttsSafetyTimer?.cancel();

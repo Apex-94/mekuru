@@ -1,30 +1,35 @@
 import 'dart:async';
+import 'dart:io';
 
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:mekuru/features/reader/data/services/gemma_translation.dart';
-import 'package:mekuru/features/reader/data/services/sentence_translation.dart';
-import 'package:mekuru/features/reader/presentation/providers/gemma_download_provider.dart';
-import 'package:mekuru/features/reader/presentation/widgets/translation_memory_warning.dart';
 import 'package:mekuru/core/services/usage_telemetry.dart';
+import 'package:mekuru/features/dictionary/data/models/audio_pack_models.dart';
 import 'package:mekuru/features/dictionary/data/models/dictionary_catalog.dart';
+import 'package:mekuru/features/dictionary/presentation/providers/audio_pack_providers.dart';
 import 'package:mekuru/features/dictionary/presentation/screens/dictionary_catalog_screen.dart';
 import 'package:mekuru/features/dictionary/presentation/widgets/catalog_dictionary_tile.dart';
 import 'package:mekuru/features/manga/presentation/providers/local_ocr_providers.dart';
 import 'package:mekuru/features/manga/presentation/widgets/local_ocr_widgets.dart';
 import 'package:mekuru/features/manga/presentation/widgets/manga_ocr_ios_download_tile.dart';
+import 'package:mekuru/features/reader/data/services/gemma_translation.dart';
+import 'package:mekuru/features/reader/data/services/sentence_translation.dart';
+import 'package:mekuru/features/reader/presentation/providers/gemma_download_provider.dart';
+import 'package:mekuru/features/reader/presentation/widgets/translation_memory_warning.dart';
 import 'package:mekuru/features/settings/presentation/providers/app_settings_providers.dart';
-import 'package:mekuru/features/settings/presentation/providers/jpdb_freq_providers.dart';
 import 'package:mekuru/features/settings/presentation/providers/enhanced_furigana_dict_providers.dart';
+import 'package:mekuru/features/settings/presentation/providers/jpdb_freq_providers.dart';
 import 'package:mekuru/features/settings/presentation/providers/kanjidic_providers.dart';
 import 'package:mekuru/features/settings/presentation/providers/kanjivg_providers.dart';
-import 'package:mekuru/shared/widgets/download_status.dart';
-import 'package:mekuru/shared/widgets/mobile_data_dialog.dart';
 import 'package:mekuru/features/settings/presentation/widgets/starter_pack_card.dart';
 import 'package:mekuru/l10n/l10n.dart';
 import 'package:mekuru/shared/utils/app_routes.dart';
 import 'package:mekuru/shared/utils/haptics.dart';
+import 'package:mekuru/shared/widgets/download_status.dart';
+import 'package:mekuru/shared/widgets/mobile_data_dialog.dart';
 import 'package:mekuru/shared/widgets/settings/settings_rows.dart';
 
 /// Screen listing all downloadable assets (dictionaries, kanji data, etc.).
@@ -44,6 +49,7 @@ class _DownloadsScreenState extends ConsumerState<DownloadsScreen> {
       ref.read(jpdbFreqProvider.notifier).checkStatus();
       ref.read(kanjidicProvider.notifier).checkStatus();
       ref.read(enhancedFuriganaDictProvider.notifier).checkStatus();
+      ref.read(audioPackProvider.notifier).checkStatus();
       ref
           .read(enhancedFuriganaDictEnabledProvider.notifier)
           .loadPersistedSettings();
@@ -57,6 +63,7 @@ class _DownloadsScreenState extends ConsumerState<DownloadsScreen> {
     final jpdbFreqState = ref.watch(jpdbFreqProvider);
     final kanjidicState = ref.watch(kanjidicProvider);
     final enhancedFuriganaState = ref.watch(enhancedFuriganaDictProvider);
+    final audioPackState = ref.watch(audioPackProvider);
     final lowRamMode = ref.watch(lowRamModeProvider);
     final theme = Theme.of(context);
 
@@ -198,6 +205,25 @@ class _DownloadsScreenState extends ConsumerState<DownloadsScreen> {
               suffix: l10n.downloadsUniDicAttributionSuffix,
             ),
           ),
+          const SizedBox(height: 8),
+
+          // Japanese Word Audio Pack
+          _AudioPackTile(state: audioPackState, theme: theme),
+          if (audioPackState.isBusy)
+            DownloadProgress(
+              progress: audioPackState.progress,
+              label: audioPackState.progress < 0.85
+                  ? l10n.downloadsAudioPackDownloadingPercent(
+                      percent: (audioPackState.progress / 0.85 * 100)
+                          .toInt()
+                          .clamp(0, 100),
+                    )
+                  : l10n.downloadsAudioPackExtracting,
+            ),
+          if (audioPackState.error != null)
+            DownloadErrorText(text: audioPackState.error!),
+          if (audioPackState.successMessage != null)
+            DownloadSuccessText(text: audioPackState.successMessage!),
           const SizedBox(height: 8),
           // iOS finds text with Apple Vision and needs only the manga-ocr
           // files; Android's pack and its download run in the native service.
@@ -447,6 +473,7 @@ const _kanjidicSize = '0.7 MB';
 const _jpdbSize = '6 MB';
 const _kanjiVgSize = '22 MB';
 const _enhancedFuriganaSize = '45 MB';
+const _audioPackSize = '180 MB';
 
 class _KanjiVgTile extends ConsumerWidget {
   const _KanjiVgTile({required this.state, required this.theme});
@@ -789,3 +816,124 @@ class _EnhancedFuriganaDictTile extends ConsumerWidget {
     );
   }
 }
+
+class _AudioPackTile extends ConsumerWidget {
+  const _AudioPackTile({required this.state, required this.theme});
+
+  final AudioPackState state;
+  final ThemeData theme;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = context.l10n;
+    final subtitle = state.isInstalled
+        ? l10n.downloadsAudioPackInstalled(
+            count: '${state.wordCount}',
+            size: '${(state.totalSizeBytes / (1024 * 1024)).toStringAsFixed(0)} MB',
+          )
+        : l10n.downloadsAudioPackDescription;
+
+    return ListTile(
+      leading: Icon(
+        Icons.record_voice_over_outlined,
+        color: theme.colorScheme.primary,
+      ),
+      title: Text(l10n.downloadsAudioPackTitle),
+      subtitle: Text(subtitle),
+      trailing: _buildTrailing(context, ref),
+    );
+  }
+
+  Widget _buildTrailing(BuildContext context, WidgetRef ref) {
+    if (state.isBusy) {
+      return const SizedBox(
+        width: 24,
+        height: 24,
+        child: CircularProgressIndicator(strokeWidth: 2),
+      );
+    }
+
+    if (state.isInstalled) {
+      return Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          IconButton(
+            icon: const Icon(Icons.file_upload_outlined),
+            tooltip: context.l10n.downloadsAudioPackImportTooltip,
+            onPressed: () => _pickAndImportZip(context, ref),
+          ),
+          IconButton(
+            icon: Icon(
+              Icons.delete_outline,
+              color: Theme.of(context).colorScheme.error,
+            ),
+            tooltip: context.l10n.downloadsAudioPackDeleteTooltip,
+            onPressed: () => _confirmDelete(context),
+          ),
+        ],
+      );
+    }
+
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        IconButton(
+          icon: const Icon(Icons.file_upload_outlined),
+          tooltip: context.l10n.downloadsAudioPackImportTooltip,
+          onPressed: () => _pickAndImportZip(context, ref),
+        ),
+        FilledButton.tonal(
+          onPressed: () => askThenDownload(
+            context,
+            _audioPackSize,
+            ref.read(audioPackProvider.notifier).download,
+          ),
+          child: Text(context.l10n.commonDownload),
+        ),
+      ],
+    );
+  }
+
+  Future<void> _pickAndImportZip(BuildContext context, WidgetRef ref) async {
+    try {
+      final picked = await FilePicker.pickFile(
+        type: FileType.custom,
+        allowedExtensions: ['zip'],
+      );
+      final filePath = picked?.path;
+      if (filePath != null) {
+        ref.read(audioPackProvider.notifier).importFromFile(File(filePath));
+      }
+    } on PlatformException catch (e) {
+      if (e.code != 'already_active' && e.code != 'unknown_activity') rethrow;
+    }
+  }
+
+  void _confirmDelete(BuildContext context) {
+    final container = ProviderScope.containerOf(context, listen: false);
+    showDialog<void>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(ctx.l10n.downloadsAudioPackConfirmDeleteTitle),
+        content: Text(ctx.l10n.downloadsAudioPackConfirmDeleteBody),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: Text(ctx.l10n.commonCancel),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.of(ctx).pop();
+              container.read(audioPackProvider.notifier).delete();
+            },
+            child: Text(
+              ctx.l10n.commonDelete,
+              style: TextStyle(color: Theme.of(ctx).colorScheme.error),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
