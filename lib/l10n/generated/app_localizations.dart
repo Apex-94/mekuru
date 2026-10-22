@@ -780,6 +780,30 @@ abstract class AppLocalizations {
   /// **'Sent \"{expression}\" to AnkiMobile'**
   String dictionarySentToAnkiMobile({required String expression});
 
+  /// Tooltip for playing word pronunciation via TTS.
+  ///
+  /// In en, this message translates to:
+  /// **'Play pronunciation'**
+  String get dictionaryPlayAudioTooltip;
+
+  /// Tooltip for stopping active word pronunciation.
+  ///
+  /// In en, this message translates to:
+  /// **'Stop pronunciation'**
+  String get dictionaryStopAudioTooltip;
+
+  /// Tooltip shown when word pronunciation fails or is unavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Pronunciation unavailable'**
+  String get dictionaryAudioErrorTooltip;
+
+  /// Error message when Japanese TTS engine or voice data is missing.
+  ///
+  /// In en, this message translates to:
+  /// **'Japanese speech synthesis (ja-JP) is not available on this device'**
+  String get ttsLanguageNotSupported;
+
   /// Tooltip for copying a dictionary expression.
   ///
   /// In en, this message translates to:

@@ -537,6 +537,22 @@
       }
     }
   },
+  "dictionaryPlayAudioTooltip": "Play pronunciation",
+  "@dictionaryPlayAudioTooltip": {
+    "description": "Tooltip for playing word pronunciation via TTS."
+  },
+  "dictionaryStopAudioTooltip": "Stop pronunciation",
+  "@dictionaryStopAudioTooltip": {
+    "description": "Tooltip for stopping active word pronunciation."
+  },
+  "dictionaryAudioErrorTooltip": "Pronunciation unavailable",
+  "@dictionaryAudioErrorTooltip": {
+    "description": "Tooltip shown when word pronunciation fails or is unavailable."
+  },
+  "ttsLanguageNotSupported": "Japanese speech synthesis (ja-JP) is not available on this device",
+  "@ttsLanguageNotSupported": {
+    "description": "Error message when Japanese TTS engine or voice data is missing."
+  },
   "dictionaryCopyTooltip": "Copy",
   "@dictionaryCopyTooltip": {
     "description": "Tooltip for copying a dictionary expression."

@@ -416,6 +416,18 @@ class AppLocalizationsJa extends AppLocalizations {
   }
 
   @override
+  String get dictionaryPlayAudioTooltip => '発音を再生';
+
+  @override
+  String get dictionaryStopAudioTooltip => '発音を停止';
+
+  @override
+  String get dictionaryAudioErrorTooltip => '発音を利用できません';
+
+  @override
+  String get ttsLanguageNotSupported => 'この端末では日本語の音声合成 (ja-JP) が利用できません';
+
+  @override
   String get dictionaryCopyTooltip => 'コピー';
 
   @override

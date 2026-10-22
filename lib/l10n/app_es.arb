@@ -382,6 +382,10 @@
     }
   },
   "dictionarySentToAnkiMobile": "Enviado \"{expression}\" a AnkiMobile",
+  "dictionaryPlayAudioTooltip": "Reproducir pronunciación",
+  "dictionaryStopAudioTooltip": "Detener pronunciación",
+  "dictionaryAudioErrorTooltip": "Pronunciación no disponible",
+  "ttsLanguageNotSupported": "La síntesis de voz en japonés (ja-JP) no está disponible en este dispositivo",
   "dictionaryCopyTooltip": "Copiar",
   "@dictionaryCopyTooltip": {
     "description": "Tooltip for copying a dictionary expression."

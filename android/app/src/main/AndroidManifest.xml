@@ -61,5 +61,9 @@
             <data android:mimeType="text/plain" />
         </intent>
         <package android:name="com.ichi2.anki" />
+        <!-- Android TextToSpeech engine visibility for flutter_tts -->
+        <intent>
+            <action android:name="android.intent.action.TTS_SERVICE" />
+        </intent>
     </queries>
 </manifest>

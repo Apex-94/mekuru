@@ -382,6 +382,10 @@
     }
   },
   "dictionarySentToAnkiMobile": "\"{expression}\" dikirim ke AnkiMobile",
+  "dictionaryPlayAudioTooltip": "Putar pengucapan",
+  "dictionaryStopAudioTooltip": "Hentikan pengucapan",
+  "dictionaryAudioErrorTooltip": "Pengucapan tidak tersedia",
+  "ttsLanguageNotSupported": "Sintesis suara bahasa Jepang (ja-JP) tidak tersedia di perangkat ini",
   "dictionaryCopyTooltip": "Salin",
   "@dictionaryCopyTooltip": {
     "description": "Tooltip for copying a dictionary expression."

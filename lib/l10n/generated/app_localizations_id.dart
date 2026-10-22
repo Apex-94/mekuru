@@ -426,6 +426,19 @@ class AppLocalizationsId extends AppLocalizations {
   }
 
   @override
+  String get dictionaryPlayAudioTooltip => 'Putar pengucapan';
+
+  @override
+  String get dictionaryStopAudioTooltip => 'Hentikan pengucapan';
+
+  @override
+  String get dictionaryAudioErrorTooltip => 'Pengucapan tidak tersedia';
+
+  @override
+  String get ttsLanguageNotSupported =>
+      'Sintesis suara bahasa Jepang (ja-JP) tidak tersedia di perangkat ini';
+
+  @override
   String get dictionaryCopyTooltip => 'Salin';
 
   @override

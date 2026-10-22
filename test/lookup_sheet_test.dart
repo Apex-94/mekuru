@@ -18,6 +18,7 @@ import 'package:mekuru/features/dictionary/data/services/dictionary_query_servic
 import 'package:mekuru/features/dictionary/presentation/providers/dictionary_providers.dart';
 import 'package:mekuru/features/reader/presentation/widgets/lookup_sheet.dart';
 import 'package:mekuru/features/settings/presentation/providers/app_settings_providers.dart';
+import 'package:mekuru/features/tts/presentation/widgets/tts_pronunciation_button.dart';
 import 'package:mekuru/main.dart' show databaseProvider;
 import 'package:mekuru/shared/widgets/grouped_dictionary_entry_card.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -960,5 +961,15 @@ void main() {
       expect(find.text('HQ:餅を食べる。'), findsOneWidget);
       expect(find.text(_notReady), findsNothing);
     }, variant: _android);
+
+    testWidgets('renders pronunciation button in sheet header', (tester) async {
+      await pumpSheet(
+        tester,
+        const LookupSheet(selectedText: '猫'),
+      );
+
+      expect(find.byType(TtsPronunciationButton), findsOneWidget);
+      expect(find.byIcon(Icons.volume_up_outlined), findsOneWidget);
+    });
   });
 }

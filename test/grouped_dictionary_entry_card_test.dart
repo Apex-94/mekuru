@@ -20,6 +20,7 @@ import 'package:mekuru/features/dictionary/data/services/dictionary_query_servic
 import 'package:mekuru/features/dictionary/presentation/widgets/source_section_label.dart';
 import 'package:mekuru/features/dictionary/presentation/widgets/tappable_expression_text.dart';
 import 'package:mekuru/features/reader/data/services/sentence_translation.dart';
+import 'package:mekuru/features/tts/presentation/widgets/tts_pronunciation_button.dart';
 import 'package:mekuru/main.dart' show databaseProvider, scaffoldMessengerKey;
 import 'package:mekuru/shared/widgets/furigana_text.dart';
 import 'package:mekuru/shared/widgets/grouped_dictionary_entry_card.dart';
@@ -759,6 +760,32 @@ void main() {
     expect(launched, hasLength(1));
     expect(find.text('Sent "猫" to AnkiMobile'), findsOneWidget);
     expect(find.textContaining('Added'), findsNothing);
+  });
+
+  testWidgets('renders pronunciation button in action buttons', (tester) async {
+    final entry = _buildEntry(
+      id: 1,
+      expression: '猫',
+      reading: 'ねこ',
+    );
+    await tester.pumpWidget(
+      _buildTestApp(
+        db: db,
+        child: GroupedDictionaryEntryCard(
+          entries: [
+            DictionaryEntryWithSource(
+              entry: entry,
+              dictionaryName: 'JMdict',
+            ),
+          ],
+          pitchAccents: const [],
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.byType(TtsPronunciationButton), findsOneWidget);
+    expect(find.byIcon(Icons.volume_up_outlined), findsOneWidget);
   });
 }
 

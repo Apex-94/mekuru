@@ -1,7 +1,7 @@
 name: mekuru
 description: "Japanese EPUB Reader with vertical text and offline Yomitan dictionary."
 publish_to: 'none'
-version: 1.70.3+1
+version: 1.71.0+1
 
 environment:
   sdk: ^3.10.8
@@ -79,6 +79,9 @@ dependencies:
 
   # Kanji stroke order
   flutter_svg: ^2.0.17
+
+  # Japanese word pronunciation text-to-speech
+  flutter_tts: ^4.2.0
 
   # Reading stats charts. The activity heatmap is hand-painted rather than
   # taken from heatmap_calendar_plus: that package fills every cell with a

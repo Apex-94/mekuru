@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/misc.dart' show Override;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mekuru/core/database/database_provider.dart';
+import 'package:mekuru/features/tts/presentation/widgets/tts_pronunciation_button.dart';
 import 'package:mekuru/features/vocabulary/presentation/providers/vocabulary_providers.dart';
 import 'package:mekuru/features/vocabulary/presentation/screens/vocabulary_screen.dart';
 
@@ -155,5 +156,13 @@ void main() {
     await _selectAndExport(tester);
     expect(find.text('Error: Exception: disk full'), findsOneWidget);
     expect(find.text('1 selected'), findsOneWidget);
+  });
+
+  testWidgets('vocabulary item tile renders pronunciation button', (tester) async {
+    await tester.pumpWidget(_app([_taberu]));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(TtsPronunciationButton), findsOneWidget);
+    expect(find.byIcon(Icons.volume_up_outlined), findsOneWidget);
   });
 }

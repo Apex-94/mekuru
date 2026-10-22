@@ -19,6 +19,7 @@ import 'package:mekuru/features/dictionary/presentation/widgets/source_section_l
 import 'package:mekuru/features/dictionary/presentation/widgets/tappable_expression_text.dart';
 import 'package:mekuru/features/dictionary/presentation/widgets/user_definition_dialog.dart';
 import 'package:mekuru/features/settings/presentation/providers/app_settings_providers.dart';
+import 'package:mekuru/features/tts/presentation/widgets/tts_pronunciation_button.dart';
 import 'package:mekuru/features/vocabulary/presentation/providers/vocabulary_providers.dart';
 import 'package:mekuru/l10n/l10n.dart';
 import 'package:mekuru/main.dart' show scaffoldMessengerKey;
@@ -538,6 +539,11 @@ class _GroupedDictionaryEntryHeaderState
     final ankiBusy =
         _preparingAnkiNote || (_isCheckingAnki && ankidroidConfig.isConfigured);
     return [
+      TtsPronunciationButton(
+        expression: _primaryEntry.expression,
+        reading: _primaryEntry.reading,
+        iconSize: 20,
+      ),
       IconButton(
         onPressed: _copyExpression,
         icon: const Icon(Icons.copy_outlined),

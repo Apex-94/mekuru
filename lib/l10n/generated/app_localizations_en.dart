@@ -425,6 +425,19 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get dictionaryPlayAudioTooltip => 'Play pronunciation';
+
+  @override
+  String get dictionaryStopAudioTooltip => 'Stop pronunciation';
+
+  @override
+  String get dictionaryAudioErrorTooltip => 'Pronunciation unavailable';
+
+  @override
+  String get ttsLanguageNotSupported =>
+      'Japanese speech synthesis (ja-JP) is not available on this device';
+
+  @override
   String get dictionaryCopyTooltip => 'Copy';
 
   @override

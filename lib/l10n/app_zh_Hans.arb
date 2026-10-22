@@ -382,6 +382,10 @@
     }
   },
   "dictionarySentToAnkiMobile": "已将“{expression}”发送到AnkiMobile",
+  "dictionaryPlayAudioTooltip": "播放发音",
+  "dictionaryStopAudioTooltip": "停止发音",
+  "dictionaryAudioErrorTooltip": "无法播放发音",
+  "ttsLanguageNotSupported": "此设备无法使用日语语音合成 (ja-JP)",
   "dictionaryCopyTooltip": "复制",
   "@dictionaryCopyTooltip": {
     "description": "Tooltip for copying a dictionary expression."

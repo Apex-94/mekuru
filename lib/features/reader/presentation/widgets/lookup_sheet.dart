@@ -12,6 +12,7 @@ import 'package:mekuru/features/reader/data/services/gemma_translation.dart';
 import 'package:mekuru/features/reader/presentation/widgets/sentence_translation_view.dart';
 import 'package:mekuru/features/settings/presentation/providers/app_settings_providers.dart';
 import 'package:mekuru/features/settings/presentation/widgets/starter_pack_card.dart';
+import 'package:mekuru/features/tts/presentation/widgets/tts_pronunciation_button.dart';
 import 'package:mekuru/l10n/l10n.dart';
 import 'package:mekuru/shared/widgets/grouped_dictionary_entry_card.dart';
 import 'package:mekuru/shared/utils/app_routes.dart';
@@ -372,44 +373,59 @@ class _LookupSheetState extends ConsumerState<LookupSheet>
       );
     }
 
-    // Display mode: show tappable text (if editable)
+    // Display mode: show tappable text (if editable) and pronunciation button
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
-      child: GestureDetector(
-        onTap: widget.editable
-            ? () {
-                setState(() {
-                  _isEditing = true;
-                  _editController.text = displayText;
-                  _editController.selection = TextSelection(
-                    baseOffset: 0,
-                    extentOffset: displayText.length,
-                  );
-                });
-                widget.onEditingStarted?.call();
-              }
-            : null,
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Flexible(
-              child: Text(
-                displayText,
-                style: Theme.of(context).textTheme.headlineSmall,
-                textAlign: TextAlign.center,
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Flexible(
+            child: GestureDetector(
+              onTap: widget.editable
+                  ? () {
+                      setState(() {
+                        _isEditing = true;
+                        _editController.text = displayText;
+                        _editController.selection = TextSelection(
+                          baseOffset: 0,
+                          extentOffset: displayText.length,
+                        );
+                      });
+                      widget.onEditingStarted?.call();
+                    }
+                  : null,
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Flexible(
+                    child: Text(
+                      displayText,
+                      style: Theme.of(context).textTheme.headlineSmall,
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                  if (widget.editable) ...[
+                    const SizedBox(width: 6),
+                    Icon(
+                      Icons.edit_outlined,
+                      size: 16,
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
+                  ],
+                ],
               ),
             ),
-            if (widget.editable) ...[
-              const SizedBox(width: 6),
-              Icon(
-                Icons.edit_outlined,
-                size: 16,
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
-            ],
-          ],
-        ),
+          ),
+          const SizedBox(width: 4),
+          TtsPronunciationButton(
+            expression: displayText,
+            reading: widget.surfaceForm,
+            iconSize: 20,
+            variant: TtsButtonVariant.compact,
+          ),
+        ],
       ),
     );
   }

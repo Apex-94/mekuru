@@ -4,6 +4,7 @@ import 'package:mekuru/core/database/database_provider.dart';
 import 'package:mekuru/features/dictionary/data/services/glossary_parser.dart';
 import 'package:mekuru/features/dictionary/presentation/screens/dictionary_search_screen.dart';
 import 'package:mekuru/features/settings/presentation/screens/downloads_screen.dart';
+import 'package:mekuru/features/tts/presentation/widgets/tts_pronunciation_button.dart';
 import 'package:mekuru/features/vocabulary/presentation/providers/vocabulary_providers.dart';
 import 'package:mekuru/features/vocabulary/presentation/utils/vocabulary_search.dart';
 import 'package:mekuru/l10n/l10n.dart';
@@ -356,6 +357,18 @@ class _VocabularyItem extends ConsumerWidget {
       leading: isSelectionMode
           ? Checkbox(value: isSelected, onChanged: (_) => onToggleSelection())
           : null,
+      trailing: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          TtsPronunciationButton(
+            expression: word.expression,
+            reading: word.reading,
+            iconSize: 20,
+            variant: TtsButtonVariant.compact,
+          ),
+          if (!isSelectionMode) const Icon(Icons.expand_more),
+        ],
+      ),
       title: Text(word.expression),
       subtitle: Text(
         word.reading.isNotEmpty && word.reading != word.expression

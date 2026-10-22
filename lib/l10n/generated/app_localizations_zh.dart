@@ -411,6 +411,18 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
+  String get dictionaryPlayAudioTooltip => '播放發音';
+
+  @override
+  String get dictionaryStopAudioTooltip => '停止發音';
+
+  @override
+  String get dictionaryAudioErrorTooltip => '無法播放發音';
+
+  @override
+  String get ttsLanguageNotSupported => '此裝置無法使用日語語音合成 (ja-JP)';
+
+  @override
   String get dictionaryCopyTooltip => '复制';
 
   @override
@@ -4805,6 +4817,18 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   String dictionarySentToAnkiMobile({required String expression}) {
     return '已将“$expression”发送到AnkiMobile';
   }
+
+  @override
+  String get dictionaryPlayAudioTooltip => '播放发音';
+
+  @override
+  String get dictionaryStopAudioTooltip => '停止发音';
+
+  @override
+  String get dictionaryAudioErrorTooltip => '无法播放发音';
+
+  @override
+  String get ttsLanguageNotSupported => '此设备无法使用日语语音合成 (ja-JP)';
 
   @override
   String get dictionaryCopyTooltip => '复制';
