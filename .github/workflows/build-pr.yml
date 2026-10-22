@@ -114,6 +114,14 @@ jobs:
           flutter build apk --debug --flavor parallel --target-platform android-arm64 --split-per-abi --no-pub
           python scripts/verify_native_libs.py build/app/outputs/flutter-apk/app-arm64-v8a-parallel-debug.apk --abis arm64-v8a
 
+      - name: Upload APK artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: mekuru-debug-apks
+          if-no-files-found: ignore
+          path: build/app/outputs/flutter-apk/*.apk
+          retention-days: 14
+
       - name: Upload test reports
         if: always()
         uses: actions/upload-artifact@v4
