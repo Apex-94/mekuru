@@ -6,6 +6,7 @@ import 'package:mekuru/core/database/database_provider.dart';
 import 'package:mekuru/features/dictionary/data/services/dictionary_query_service.dart';
 import 'package:mekuru/features/dictionary/presentation/providers/dictionary_providers.dart';
 import 'package:mekuru/features/dictionary/presentation/screens/dictionary_search_screen.dart';
+import 'package:mekuru/features/dictionary/presentation/widgets/audio_pronunciation_button.dart';
 import 'package:mekuru/features/dictionary/presentation/widgets/user_definition_dialog.dart';
 import 'package:mekuru/features/reader/data/services/deinflection.dart';
 import 'package:mekuru/features/reader/data/services/gemma_translation.dart';
@@ -400,6 +401,14 @@ class _LookupSheetState extends ConsumerState<LookupSheet>
                 textAlign: TextAlign.center,
               ),
             ),
+            if (!widget.editable || !_isEditing) ...[
+              const SizedBox(width: 4),
+              AudioPronunciationButton(
+                expression: displayText,
+                reading: widget.surfaceForm ?? displayText,
+                iconSize: 18,
+              ),
+            ],
             if (widget.editable) ...[
               const SizedBox(width: 6),
               Icon(

@@ -14,6 +14,7 @@ import 'package:mekuru/features/dictionary/data/services/kanji_reading_parser.da
 import 'package:mekuru/features/dictionary/data/services/dictionary_query_service.dart';
 import 'package:mekuru/features/dictionary/data/services/part_of_speech_resolver.dart';
 import 'package:mekuru/features/dictionary/presentation/providers/dictionary_providers.dart';
+import 'package:mekuru/features/dictionary/presentation/widgets/audio_pronunciation_button.dart';
 import 'package:mekuru/features/dictionary/presentation/widgets/kanji_readings_block.dart';
 import 'package:mekuru/features/dictionary/presentation/widgets/source_section_label.dart';
 import 'package:mekuru/features/dictionary/presentation/widgets/tappable_expression_text.dart';
@@ -538,6 +539,11 @@ class _GroupedDictionaryEntryHeaderState
     final ankiBusy =
         _preparingAnkiNote || (_isCheckingAnki && ankidroidConfig.isConfigured);
     return [
+      AudioPronunciationButton(
+        expression: _primaryEntry.expression,
+        reading: _primaryEntry.reading,
+        iconSize: 20,
+      ),
       IconButton(
         onPressed: _copyExpression,
         icon: const Icon(Icons.copy_outlined),

@@ -428,6 +428,12 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
+  String get dictionaryPlayAudioTooltip => 'Reproducir pronunciación';
+
+  @override
+  String get dictionaryAudioErrorTooltip => 'Pronunciación no disponible';
+
+  @override
   String get dictionaryCopyTooltip => 'Copiar';
 
   @override

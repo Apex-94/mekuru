@@ -425,6 +425,12 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get dictionaryPlayAudioTooltip => 'Play pronunciation';
+
+  @override
+  String get dictionaryAudioErrorTooltip => 'Pronunciation unavailable';
+
+  @override
   String get dictionaryCopyTooltip => 'Copy';
 
   @override

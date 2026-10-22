@@ -780,6 +780,18 @@ abstract class AppLocalizations {
   /// **'Sent \"{expression}\" to AnkiMobile'**
   String dictionarySentToAnkiMobile({required String expression});
 
+  /// Tooltip for playing word pronunciation audio.
+  ///
+  /// In en, this message translates to:
+  /// **'Play pronunciation'**
+  String get dictionaryPlayAudioTooltip;
+
+  /// Tooltip shown when audio pronunciation fails or is unavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Pronunciation unavailable'**
+  String get dictionaryAudioErrorTooltip;
+
   /// Tooltip for copying a dictionary expression.
   ///
   /// In en, this message translates to:

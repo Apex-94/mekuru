@@ -537,6 +537,14 @@
       }
     }
   },
+  "dictionaryPlayAudioTooltip": "Play pronunciation",
+  "@dictionaryPlayAudioTooltip": {
+    "description": "Tooltip for playing word pronunciation audio."
+  },
+  "dictionaryAudioErrorTooltip": "Pronunciation unavailable",
+  "@dictionaryAudioErrorTooltip": {
+    "description": "Tooltip shown when audio pronunciation fails or is unavailable."
+  },
   "dictionaryCopyTooltip": "Copy",
   "@dictionaryCopyTooltip": {
     "description": "Tooltip for copying a dictionary expression."

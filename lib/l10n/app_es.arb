@@ -382,6 +382,8 @@
     }
   },
   "dictionarySentToAnkiMobile": "Enviado \"{expression}\" a AnkiMobile",
+  "dictionaryPlayAudioTooltip": "Reproducir pronunciación",
+  "dictionaryAudioErrorTooltip": "Pronunciación no disponible",
   "dictionaryCopyTooltip": "Copiar",
   "@dictionaryCopyTooltip": {
     "description": "Tooltip for copying a dictionary expression."
