@@ -502,6 +502,14 @@
   "@vocabularyContextLabel": {
     "description": "Label for the saved sentence context."
   },
+  "vocabularyAddFurigana": "Tambahkan furigana",
+  "@vocabularyAddFurigana": {
+    "description": "Tooltip for adding furigana ruby annotations to vocabulary context."
+  },
+  "vocabularyHideFurigana": "Sembunyikan furigana",
+  "@vocabularyHideFurigana": {
+    "description": "Tooltip for hiding furigana ruby annotations from vocabulary context."
+  },
   "vocabularyAddedOn": "Ditambahkan: {date}",
   "@vocabularyAddedOn": {
     "description": "Date label shown for a saved vocabulary entry.",

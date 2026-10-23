@@ -523,6 +523,12 @@ class AppLocalizationsJa extends AppLocalizations {
   String get vocabularyContextLabel => '文脈：';
 
   @override
+  String get vocabularyAddFurigana => 'ふりがなを表示';
+
+  @override
+  String get vocabularyHideFurigana => 'ふりがなを非表示';
+
+  @override
   String vocabularyAddedOn({required String date}) {
     return '追加日：$date';
   }

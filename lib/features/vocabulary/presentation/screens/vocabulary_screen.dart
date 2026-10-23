@@ -5,10 +5,12 @@ import 'package:mekuru/features/dictionary/data/services/glossary_parser.dart';
 import 'package:mekuru/features/dictionary/presentation/screens/dictionary_search_screen.dart';
 import 'package:mekuru/features/settings/presentation/screens/downloads_screen.dart';
 import 'package:mekuru/features/tts/presentation/widgets/tts_pronunciation_button.dart';
+import 'package:mekuru/features/vocabulary/data/services/vocabulary_furigana_service.dart';
 import 'package:mekuru/features/vocabulary/presentation/providers/vocabulary_providers.dart';
 import 'package:mekuru/features/vocabulary/presentation/utils/vocabulary_search.dart';
 import 'package:mekuru/l10n/l10n.dart';
 import 'package:mekuru/shared/utils/app_routes.dart';
+import 'package:mekuru/shared/widgets/furigana_text.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
 
 class VocabularyScreen extends ConsumerStatefulWidget {
@@ -329,7 +331,7 @@ class _VocabularyScreenState extends ConsumerState<VocabularyScreen> {
   }
 }
 
-class _VocabularyItem extends ConsumerWidget {
+class _VocabularyItem extends ConsumerStatefulWidget {
   const _VocabularyItem({
     required this.word,
     required this.isSelectionMode,
@@ -343,8 +345,73 @@ class _VocabularyItem extends ConsumerWidget {
   final VoidCallback onToggleSelection;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<_VocabularyItem> createState() => _VocabularyItemState();
+}
+
+class _VocabularyItemState extends ConsumerState<_VocabularyItem> {
+  bool _showFurigana = false;
+  bool _loadingFurigana = false;
+  List<FuriganaSegment>? _furiganaSegments;
+
+  Future<void> _toggleFurigana() async {
+    if (_showFurigana) {
+      setState(() {
+        _showFurigana = false;
+      });
+      return;
+    }
+
+    if (_furiganaSegments != null) {
+      setState(() {
+        _showFurigana = true;
+      });
+      return;
+    }
+
+    if (widget.word.sentenceContext.isEmpty) {
+      setState(() {
+        _showFurigana = true;
+      });
+      return;
+    }
+
+    setState(() {
+      _loadingFurigana = true;
+    });
+
+    try {
+      final service = ref.read(vocabularyFuriganaServiceProvider);
+      final segments = await service.generateFurigana(
+        widget.word.sentenceContext,
+        expression: widget.word.expression,
+        reading: widget.word.reading,
+      );
+      if (mounted) {
+        setState(() {
+          _furiganaSegments = segments;
+          _showFurigana = true;
+          _loadingFurigana = false;
+        });
+      }
+    } catch (_) {
+      if (mounted) {
+        setState(() {
+          _loadingFurigana = false;
+          _showFurigana = true;
+          _furiganaSegments = VocabularyFuriganaService.fallbackSegments(
+            widget.word.sentenceContext,
+            expression: widget.word.expression,
+            reading: widget.word.reading,
+          );
+        });
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final l10n = context.l10n;
+    final word = widget.word;
     final definitions = GlossaryParser.parse(word.glossaries);
 
     // A definition can span lines (senses, a note before the glosses); the
@@ -354,8 +421,11 @@ class _VocabularyItem extends ConsumerWidget {
         : l10n.vocabularyNoDefinition;
 
     final tile = ExpansionTile(
-      leading: isSelectionMode
-          ? Checkbox(value: isSelected, onChanged: (_) => onToggleSelection())
+      leading: widget.isSelectionMode
+          ? Checkbox(
+              value: widget.isSelected,
+              onChanged: (_) => widget.onToggleSelection(),
+            )
           : null,
       trailing: Row(
         mainAxisSize: MainAxisSize.min,
@@ -366,10 +436,17 @@ class _VocabularyItem extends ConsumerWidget {
             iconSize: 20,
             variant: TtsButtonVariant.compact,
           ),
-          if (!isSelectionMode) const Icon(Icons.expand_more),
+          if (!widget.isSelectionMode) const Icon(Icons.expand_more),
         ],
       ),
-      title: Text(word.expression),
+      title: _showFurigana &&
+              word.reading.isNotEmpty &&
+              word.reading != word.expression
+          ? FuriganaText(
+              expression: word.expression,
+              reading: word.reading,
+            )
+          : Text(word.expression),
       subtitle: Text(
         word.reading.isNotEmpty && word.reading != word.expression
             ? '${word.reading} - $firstDefinition'
@@ -399,16 +476,76 @@ class _VocabularyItem extends ConsumerWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        l10n.vocabularyContextLabel,
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: Theme.of(context).colorScheme.onSurfaceVariant,
-                        ),
+                      Row(
+                        children: [
+                          Text(
+                            l10n.vocabularyContextLabel,
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Theme.of(context).colorScheme.onSurfaceVariant,
+                            ),
+                          ),
+                          const Spacer(),
+                          IconButton(
+                            icon: _loadingFurigana
+                                ? const SizedBox(
+                                    width: 14,
+                                    height: 14,
+                                    child: CircularProgressIndicator(strokeWidth: 2),
+                                  )
+                                : Icon(
+                                    _showFurigana
+                                        ? Icons.subtitles
+                                        : Icons.subtitles_outlined,
+                                    size: 18,
+                                    color: _showFurigana
+                                        ? Theme.of(context).colorScheme.primary
+                                        : null,
+                                  ),
+                            tooltip: _showFurigana
+                                ? l10n.vocabularyHideFurigana
+                                : l10n.vocabularyAddFurigana,
+                            visualDensity: VisualDensity.compact,
+                            padding: EdgeInsets.zero,
+                            constraints: const BoxConstraints(
+                              minWidth: 32,
+                              minHeight: 32,
+                            ),
+                            onPressed: _toggleFurigana,
+                          ),
+                          const SizedBox(width: 4),
+                          TtsPronunciationButton(
+                            expression: word.sentenceContext,
+                            iconSize: 18,
+                            variant: TtsButtonVariant.compact,
+                          ),
+                        ],
                       ),
                       const SizedBox(height: 4),
-                      Text(word.sentenceContext),
+                      if (_showFurigana && _furiganaSegments != null)
+                        FuriganaSegmentsText(segments: _furiganaSegments!)
+                      else
+                        Text(word.sentenceContext),
                     ],
+                  ),
+                )
+              else if (word.reading.isNotEmpty &&
+                  word.reading != word.expression)
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: TextButton.icon(
+                    onPressed: _toggleFurigana,
+                    icon: Icon(
+                      _showFurigana
+                          ? Icons.subtitles
+                          : Icons.subtitles_outlined,
+                      size: 16,
+                    ),
+                    label: Text(
+                      _showFurigana
+                          ? l10n.vocabularyHideFurigana
+                          : l10n.vocabularyAddFurigana,
+                    ),
                   ),
                 ),
               const SizedBox(height: 4),
@@ -426,8 +563,8 @@ class _VocabularyItem extends ConsumerWidget {
       ],
     );
 
-    if (isSelectionMode) {
-      return InkWell(onTap: onToggleSelection, child: tile);
+    if (widget.isSelectionMode) {
+      return InkWell(onTap: widget.onToggleSelection, child: tile);
     }
 
     return Dismissible(

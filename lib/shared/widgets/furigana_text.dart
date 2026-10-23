@@ -230,8 +230,50 @@ class FuriganaText extends StatelessWidget {
 
     final segments = segmentFurigana(expression, reading);
 
-    // A Wrap, so a word wider than the line breaks between segments (and a
-    // segment wider than the line wraps its own text) instead of overflowing.
+    return FuriganaSegmentsText(
+      segments: segments,
+      textStyle: exprStyle,
+      furiganaStyle: furiStyle,
+    );
+  }
+}
+
+/// Displays a list of [FuriganaSegment]s with ruby readings above kanji in a wrapping layout.
+class FuriganaSegmentsText extends StatelessWidget {
+  const FuriganaSegmentsText({
+    super.key,
+    required this.segments,
+    this.textStyle,
+    this.furiganaStyle,
+  });
+
+  final List<FuriganaSegment> segments;
+
+  /// Style for base characters. If null, defaults to bodyMedium.
+  final TextStyle? textStyle;
+
+  /// Style for furigana readings. If null, derived from [textStyle] at 55% size.
+  final TextStyle? furiganaStyle;
+
+  @override
+  Widget build(BuildContext context) {
+    if (segments.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    final baseStyle =
+        textStyle ??
+        Theme.of(context).textTheme.bodyMedium ??
+        const TextStyle();
+
+    final furiStyle =
+        furiganaStyle ??
+        baseStyle.copyWith(
+          fontSize: (baseStyle.fontSize ?? 14) * 0.55,
+          fontWeight: FontWeight.w400,
+          height: 1.0,
+        );
+
     return Wrap(
       crossAxisAlignment: WrapCrossAlignment.end,
       children: segments.map((seg) {
@@ -244,11 +286,11 @@ class FuriganaText extends StatelessWidget {
                 style: furiStyle,
                 textAlign: TextAlign.center,
               ),
-              Text(seg.text, style: exprStyle),
+              Text(seg.text, style: baseStyle),
             ],
           );
         }
-        return Text(seg.text, style: exprStyle);
+        return Text(seg.text, style: baseStyle);
       }).toList(),
     );
   }

@@ -143,6 +143,8 @@
   "vocabularyCsvExported": "CSVをエクスポートしました",
   "vocabularyNoDefinition": "意味なし",
   "vocabularyContextLabel": "文脈：",
+  "vocabularyAddFurigana": "ふりがなを表示",
+  "vocabularyHideFurigana": "ふりがなを非表示",
   "vocabularyAddedOn": "追加日：{date}",
   "vocabularyDeletedWord": "「{expression}」を削除しました",
   "ocrPagesProgress": "{completed}/{total}ページ",

@@ -966,6 +966,18 @@ abstract class AppLocalizations {
   /// **'Context:'**
   String get vocabularyContextLabel;
 
+  /// Tooltip for adding furigana ruby annotations to vocabulary context.
+  ///
+  /// In en, this message translates to:
+  /// **'Add furigana'**
+  String get vocabularyAddFurigana;
+
+  /// Tooltip for hiding furigana ruby annotations from vocabulary context.
+  ///
+  /// In en, this message translates to:
+  /// **'Hide furigana'**
+  String get vocabularyHideFurigana;
+
   /// Date label shown for a saved vocabulary entry.
   ///
   /// In en, this message translates to:

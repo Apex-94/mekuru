@@ -518,6 +518,12 @@ class AppLocalizationsZh extends AppLocalizations {
   String get vocabularyContextLabel => '上下文：';
 
   @override
+  String get vocabularyAddFurigana => '添加假名';
+
+  @override
+  String get vocabularyHideFurigana => '隐藏假名';
+
+  @override
   String vocabularyAddedOn({required String date}) {
     return '添加时间：$date';
   }
@@ -4924,6 +4930,12 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
 
   @override
   String get vocabularyContextLabel => '上下文：';
+
+  @override
+  String get vocabularyAddFurigana => '添加假名';
+
+  @override
+  String get vocabularyHideFurigana => '隐藏假名';
 
   @override
   String vocabularyAddedOn({required String date}) {

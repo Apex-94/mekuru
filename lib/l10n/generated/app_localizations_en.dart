@@ -536,6 +536,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get vocabularyContextLabel => 'Context:';
 
   @override
+  String get vocabularyAddFurigana => 'Add furigana';
+
+  @override
+  String get vocabularyHideFurigana => 'Hide furigana';
+
+  @override
   String vocabularyAddedOn({required String date}) {
     return 'Added: $date';
   }

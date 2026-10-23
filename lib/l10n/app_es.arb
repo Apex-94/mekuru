@@ -502,6 +502,14 @@
   "@vocabularyContextLabel": {
     "description": "Label for the saved sentence context."
   },
+  "vocabularyAddFurigana": "Añadir furigana",
+  "@vocabularyAddFurigana": {
+    "description": "Tooltip for adding furigana ruby annotations to vocabulary context."
+  },
+  "vocabularyHideFurigana": "Ocultar furigana",
+  "@vocabularyHideFurigana": {
+    "description": "Tooltip for hiding furigana ruby annotations from vocabulary context."
+  },
   "vocabularyAddedOn": "Añadido: {date}",
   "@vocabularyAddedOn": {
     "description": "Date label shown for a saved vocabulary entry.",

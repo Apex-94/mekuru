@@ -8,6 +8,7 @@ import 'package:mekuru/core/database/database_provider.dart';
 import 'package:mekuru/features/tts/presentation/widgets/tts_pronunciation_button.dart';
 import 'package:mekuru/features/vocabulary/presentation/providers/vocabulary_providers.dart';
 import 'package:mekuru/features/vocabulary/presentation/screens/vocabulary_screen.dart';
+import 'package:mekuru/shared/widgets/furigana_text.dart';
 
 import '../../../../test_app.dart';
 
@@ -164,5 +165,51 @@ void main() {
 
     expect(find.byType(TtsPronunciationButton), findsOneWidget);
     expect(find.byIcon(Icons.volume_up_outlined), findsOneWidget);
+  });
+
+  testWidgets(
+      'expanding card with context shows context TTS and furigana option', (
+    tester,
+  ) async {
+    final wordWithContext = SavedWord(
+      id: 8,
+      expression: '食べる',
+      reading: 'たべる',
+      glossaries: '["to eat"]',
+      sentenceContext: 'パンを食べる。',
+      dateAdded: DateTime(2026, 10, 8),
+    );
+
+    await tester.pumpWidget(_app([wordWithContext]));
+    await tester.pumpAndSettle();
+
+    // Before expanding: only 1 pronunciation button (on the tile header)
+    expect(find.byType(TtsPronunciationButton), findsOneWidget);
+
+    // Expand the card
+    await tester.tap(find.text('食べる'));
+    await tester.pumpAndSettle();
+
+    // Now context is visible: there should be 2 TtsPronunciationButtons (header + context)
+    expect(find.byType(TtsPronunciationButton), findsNWidgets(2));
+    expect(find.text('パンを食べる。'), findsOneWidget);
+
+    // Furigana toggle button is present
+    final furiganaButton = find.byTooltip('Add furigana');
+    expect(furiganaButton, findsOneWidget);
+
+    // Toggle furigana ON
+    await tester.tap(furiganaButton);
+    await tester.pumpAndSettle();
+
+    // Tooltip switches to Hide furigana and FuriganaSegmentsText is rendered
+    expect(find.byTooltip('Hide furigana'), findsOneWidget);
+    expect(find.byType(FuriganaSegmentsText), findsOneWidget);
+
+    // Toggle furigana OFF
+    await tester.tap(find.byTooltip('Hide furigana'));
+    await tester.pumpAndSettle();
+    expect(find.byTooltip('Add furigana'), findsOneWidget);
+    expect(find.byType(FuriganaSegmentsText), findsNothing);
   });
 }

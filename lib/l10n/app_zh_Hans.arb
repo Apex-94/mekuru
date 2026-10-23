@@ -502,6 +502,14 @@
   "@vocabularyContextLabel": {
     "description": "Label for the saved sentence context."
   },
+  "vocabularyAddFurigana": "添加假名",
+  "@vocabularyAddFurigana": {
+    "description": "Tooltip for adding furigana ruby annotations to vocabulary context."
+  },
+  "vocabularyHideFurigana": "隐藏假名",
+  "@vocabularyHideFurigana": {
+    "description": "Tooltip for hiding furigana ruby annotations from vocabulary context."
+  },
   "vocabularyAddedOn": "添加时间：{date}",
   "@vocabularyAddedOn": {
     "description": "Date label shown for a saved vocabulary entry.",
